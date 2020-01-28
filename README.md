@@ -27,10 +27,13 @@ sourceControl {
 
 Use the API to send instructions to your drone, receive state updates and video frames from the camera of your drone:
 ```java
+import com.github.ele115.tello_wrapper.Facade;
+
 public class FlightPlanExample {
     public static void main(String[] args) {
         // Connect to an actual drone, or a simulated drone:
-        var drone = Facade.Connect("simulator");
+        var drone = Facade.Connect("59D70D");
+        //        = Facade.Connect("simulator");
         // Subscribe to state updates of our drone (e.g. current speed, attitude)
         drone.addStateListener((o, n) -> {
             // Do sth. when switching from one to another state
