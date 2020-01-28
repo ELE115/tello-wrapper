@@ -60,3 +60,13 @@ public class FlightPlanExample {
 ## Documentation
 
 Refer to the javadoc of [Tello4J](https://friwi.me/tello4j/javadoc/).
+
+## Legal
+
+Apache-2.0
+
+Changes from Tello4J:
+
+* Added wrapper to get away `throws`
+* Added simulator
+* Integrated `mac-to-ip`
