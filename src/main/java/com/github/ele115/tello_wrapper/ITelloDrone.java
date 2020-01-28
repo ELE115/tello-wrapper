@@ -35,27 +35,6 @@ import java.util.List;
  */
 public interface ITelloDrone {
     /**
-     * Estabilishes a connection with a tello drone at the default address (192.168.10.1). Can only be used once, please construct a new tello drone object
-     * when reconnecting.
-     * You still need to connect to the tello wifi manually before invoking this call.
-     */
-    void connect();
-
-    /**
-     * Estabilishes a connection with a tello drone at a custom address. Can only be used once, please construct a new tello drone object
-     * when reconnecting.
-     * You still need to connect to the tello wifi manually before invoking this call.
-     *
-     * @param remoteAddr The remote address or hostname your tello uses. If unsure, use {@link #connect()} to connect to the default destination IP.
-     */
-    void connect(String remoteAddr);
-
-    /**
-     * Disconnects from this tello drone. Does not close this drones resources.
-     */
-    void disconnect();
-
-    /**
      * Retrieves the connection state of this drone.
      * When the drone times out after not sending commands for 15 seconds, the drone automatically lands safely and
      * closes the connection.
