@@ -45,13 +45,11 @@ public interface ITelloDrone {
 
     /**
      * Instructs this drone to take off.
-     *
      */
     void takeoff();
 
     /**
      * Instructs this drone to land.
-     *
      */
     void land();
 
@@ -72,7 +70,6 @@ public interface ITelloDrone {
 
     /**
      * Instructs this drone to turn off all motors.
-     *
      */
     void emergency();
 

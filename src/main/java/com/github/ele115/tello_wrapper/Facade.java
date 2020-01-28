@@ -1,6 +1,13 @@
 package com.github.ele115.tello_wrapper;
 
 public class Facade {
+    /**
+     * Connect to a Tello drone.
+     *
+     * @param droneId If it is "simulator", then a fake drone is connected;
+     *                otherwise, it should be the 6-letter ID of the drone.
+     * @return Controller of the drone.
+     */
     public static ITelloDrone Connect(String droneId) {
         if (droneId == null)
             throw new RuntimeException("Please specify your Drone ID");
