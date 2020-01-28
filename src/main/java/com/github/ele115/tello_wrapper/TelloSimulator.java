@@ -11,7 +11,7 @@ import me.friwi.tello4j.api.world.TurnDirection;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TelloSimulator implements ITelloDrone {
+class TelloSimulator implements ITelloDrone {
     private List<VideoListener> videoListeners = new ArrayList<>();
     private List<StateListener> stateListeners = new ArrayList<>();
     private TelloDroneState cachedState;
@@ -24,6 +24,31 @@ public class TelloSimulator implements ITelloDrone {
     private double height = 0;
     private int speed;
 
+    protected void updateState() {
+        var temp = fetchTemperature();
+        var tof = fetchTOFDistance();
+        var height = fetchHeight();
+        var battery = fetchBattery();
+        var motorTime = fetchMotorTime();
+        var barometer = fetchBarometer();
+        var acc = fetchAcceleration();
+        var state = new TelloDroneState(
+                0, 0, (int) yaw,
+                0, 0, 0,
+                temp, temp,
+                tof, height,
+                battery,
+                motorTime,
+                barometer,
+                acc[0], acc[1], acc[2]
+        );
+        stateListeners.forEach((sl) -> {
+            sl.onStateChanged(cachedState, state);
+        });
+
+        cachedState = state;
+    }
+
     @Override
     public boolean isConnected() {
         return true;
@@ -32,11 +57,13 @@ public class TelloSimulator implements ITelloDrone {
     @Override
     public void takeoff() {
         height = 50;
+        updateState();
     }
 
     @Override
     public void land() {
         height = 0;
+        updateState();
     }
 
     @Override
@@ -52,6 +79,7 @@ public class TelloSimulator implements ITelloDrone {
     @Override
     public void emergency() {
         height = 0;
+        updateState();
     }
 
     @Override
@@ -82,6 +110,7 @@ public class TelloSimulator implements ITelloDrone {
                 y -= Math.sin(yaw / 180 * Math.PI) * cm;
                 break;
         }
+        updateState();
     }
 
     @Override
@@ -96,11 +125,27 @@ public class TelloSimulator implements ITelloDrone {
                 yaw += degrees;
                 break;
         }
+        updateState();
     }
 
     @Override
     public void flip(FlipDirection direction) {
-
+        if (height == 0)
+            throw new RuntimeException("Not taken off yet");
+        switch (direction) {
+            case LEFT:
+                left(35);
+                break;
+            case RIGHT:
+                right(35);
+                break;
+            case FORWARD:
+                forward(35);
+                break;
+            case BACKWARD:
+                backward(35);
+                break;
+        }
     }
 
     @Override
@@ -110,6 +155,7 @@ public class TelloSimulator implements ITelloDrone {
         this.x += Math.sin(yaw / 180 * Math.PI) * y + Math.cos(yaw / 180 * Math.PI) * x;
         this.y += Math.cos(yaw / 180 * Math.PI) * y - Math.sin(yaw / 180 * Math.PI) * x;
         height += z;
+        updateState();
     }
 
     @Override
@@ -119,16 +165,19 @@ public class TelloSimulator implements ITelloDrone {
         x += Math.sin(yaw / 180 * Math.PI) * y2 + Math.cos(yaw / 180 * Math.PI) * x2;
         y += Math.cos(yaw / 180 * Math.PI) * y2 - Math.sin(yaw / 180 * Math.PI) * x2;
         height += z2;
+        updateState();
     }
 
     @Override
     public void setSpeed(int speed) {
         this.speed = speed;
+        updateState();
     }
 
     @Override
     public void sendRemoteControlInputs(int lr, int fb, int ud, int yaw) {
-        // TODO
+        turnRight(yaw);
+        move(lr, fb, ud, 0);
     }
 
     @Override

@@ -13,7 +13,7 @@ import me.friwi.tello4j.api.world.TurnDirection;
 
 import java.util.List;
 
-public final class TelloAdapter implements ITelloDrone {
+final class TelloAdapter implements ITelloDrone {
     private final TelloDrone drone;
 
     public TelloAdapter() {
