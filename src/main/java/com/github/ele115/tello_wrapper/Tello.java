@@ -1,6 +1,6 @@
 package com.github.ele115.tello_wrapper;
 
-public class Facade {
+public class Tello {
     /**
      * Connect to a Tello drone.
      *
