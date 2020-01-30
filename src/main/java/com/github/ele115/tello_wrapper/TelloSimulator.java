@@ -55,8 +55,8 @@ class TelloSimulator implements ITelloDrone {
         if (traceable) {
             try {
                 var s = Double.toString(x) + "," + Double.toString(y) + "," +
-                        Double.toString(yaw) + "," + Double.toString(height);
-                Files.write(Paths.get("./tello-simulator.trace"), s.getBytes(), StandardOpenOption.APPEND);
+                        Double.toString(yaw) + "," + Double.toString(height) + "\n";
+                Files.write(Paths.get("./tello-simulator.trace"), s.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             } catch (IOException e) {
                 throw new RuntimeException("Cannot append to trace file");
             }
@@ -67,6 +67,13 @@ class TelloSimulator implements ITelloDrone {
 
     TelloSimulator(boolean trace) {
         traceable = trace;
+        if (traceable) {
+            try {
+                Files.deleteIfExists(Paths.get("./tello-simulator.trace"));
+            } catch (IOException e) {
+                throw new RuntimeException("Cannot remove trace file");
+            }
+        }
     }
 
     @Override

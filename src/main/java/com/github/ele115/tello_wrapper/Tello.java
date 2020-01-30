@@ -13,7 +13,8 @@ public final class Tello {
      * @return Controller of the drone.
      */
     public static ITelloDrone Connect(String droneId) {
-        if (System.getenv("TELLO_SIMULATOR").equals("TRUE"))
+        var env = System.getenv("TELLO_SIMULATOR");
+        if (env != null && env.equals("TRUE"))
             return new TelloSimulator(true);
         if (droneId == null)
             throw new RuntimeException("Please specify your Drone ID");
