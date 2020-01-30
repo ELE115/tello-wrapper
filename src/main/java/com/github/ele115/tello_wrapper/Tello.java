@@ -1,6 +1,10 @@
 package com.github.ele115.tello_wrapper;
 
-public class Tello {
+public final class Tello {
+    private Tello() {
+        // static class
+    }
+
     /**
      * Connect to a Tello drone.
      *

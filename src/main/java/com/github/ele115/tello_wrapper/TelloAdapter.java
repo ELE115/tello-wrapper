@@ -13,10 +13,10 @@ import me.friwi.tello4j.api.world.TurnDirection;
 
 import java.util.List;
 
-final class TelloAdapter implements ITelloDrone {
+class TelloAdapter implements ITelloDrone {
     private final TelloDrone drone;
 
-    public TelloAdapter() {
+    TelloAdapter() {
         drone = new WifiDroneFactory().build();
         try {
             drone.connect();
@@ -31,7 +31,7 @@ final class TelloAdapter implements ITelloDrone {
         }
     }
 
-    public TelloAdapter(String ip) {
+    TelloAdapter(String ip) {
         drone = new WifiDroneFactory().build();
         try {
             drone.connect(ip);
