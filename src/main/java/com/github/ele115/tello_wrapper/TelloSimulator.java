@@ -8,6 +8,10 @@ import me.friwi.tello4j.api.world.FlipDirection;
 import me.friwi.tello4j.api.world.MovementDirection;
 import me.friwi.tello4j.api.world.TurnDirection;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +27,8 @@ class TelloSimulator implements ITelloDrone {
     private double yaw = 0;
     private double height = 0;
     private int speed;
+
+    private final boolean traceable;
 
     protected void updateState() {
         var temp = fetchTemperature();
@@ -46,7 +52,21 @@ class TelloSimulator implements ITelloDrone {
             sl.onStateChanged(cachedState, state);
         });
 
+        if (traceable) {
+            try {
+                var s = Double.toString(x) + "," + Double.toString(y) + "," +
+                        Double.toString(yaw) + "," + Double.toString(height);
+                Files.write(Paths.get("./tello-simulator.trace"), s.getBytes(), StandardOpenOption.APPEND);
+            } catch (IOException e) {
+                throw new RuntimeException("Cannot append to trace file");
+            }
+        }
+
         cachedState = state;
+    }
+
+    TelloSimulator(boolean trace) {
+        traceable = trace;
     }
 
     @Override

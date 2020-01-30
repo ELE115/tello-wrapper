@@ -9,10 +9,12 @@ public class Tello {
      * @return Controller of the drone.
      */
     public static ITelloDrone Connect(String droneId) {
+        if (System.getenv("TELLO_SIMULATOR").equals("TRUE"))
+            return new TelloSimulator(true);
         if (droneId == null)
             throw new RuntimeException("Please specify your Drone ID");
         if (droneId.equals("simulator"))
-            return new TelloSimulator();
+            return new TelloSimulator(false);
         if (droneId.equals("default"))
             return new TelloAdapter();
         if (!droneId.matches("[0-9A-F]{6}"))
