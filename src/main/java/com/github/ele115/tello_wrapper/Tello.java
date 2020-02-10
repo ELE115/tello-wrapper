@@ -1,5 +1,7 @@
 package com.github.ele115.tello_wrapper;
 
+import com.github.ele115.tello_wrapper.ha.TelloAdapter;
+
 public final class Tello {
     private Tello() {
         // static class
