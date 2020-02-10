@@ -65,6 +65,8 @@ class TelloD {
             var l = new StateListener() {
                 @Override
                 public void onStateChanged(TelloDroneState oldState, TelloDroneState newState) {
+                    if (p.test(newState))
+                        System.err.println("valid"); // FIXME
                     stop.set(!p.test(newState));
                 }
             };
@@ -74,14 +76,17 @@ class TelloD {
             while (true) {
                 th = new Thread(() -> {
                     try {
-                        if (f.call())
+                        System.err.println("issue"); // FIXME
+                        if (f.call()) {
                             stop.set(true);
+                            System.err.println("short cut"); // FIXME
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 });
                 th.run();
-                for (var i = 0; i < 10; i++) {
+                for (var i = 0; i < 30; i++) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException ignored) {
@@ -95,6 +100,7 @@ class TelloD {
             } catch (InterruptedException ignored) {
             }
             drone.removeStateListener(l);
+            System.err.println("passed"); // FIXME
         }
     }
 
@@ -103,6 +109,10 @@ class TelloD {
             var o = drone.getCachedState();
             var th = new ExecuteThread(f, (s) -> ct.test(o, s));
             th.start();
+            try {
+                th.join();
+            } catch (InterruptedException ignored) {
+            }
         }
     }
 }

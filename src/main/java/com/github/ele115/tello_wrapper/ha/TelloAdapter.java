@@ -18,7 +18,7 @@ public class TelloAdapter implements ITelloDrone {
     private final TelloDrone drone;
     private final TelloD telloD;
 
-    TelloAdapter() {
+    public TelloAdapter() {
         drone = new WifiDroneFactory().build();
         try {
             drone.connect();
@@ -34,7 +34,7 @@ public class TelloAdapter implements ITelloDrone {
         telloD = new TelloD(drone);
     }
 
-    TelloAdapter(String ip) {
+    public TelloAdapter(String ip) {
         drone = new WifiDroneFactory().build();
         try {
             drone.connect(ip);
