@@ -1,10 +1,7 @@
 package com.github.ele115.tello_wrapper.ha;
 
 import com.github.ele115.tello_wrapper.tello4j.api.drone.TelloDrone;
-import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloCommandTimedOutException;
-import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloCustomCommandException;
-import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloGeneralCommandException;
-import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloNetworkException;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.*;
 import com.github.ele115.tello_wrapper.tello4j.api.state.StateListener;
 import com.github.ele115.tello_wrapper.tello4j.api.state.TelloDroneState;
 
@@ -28,8 +25,8 @@ class TelloD {
                 if (res)
                     return;
                 try {
-                    drone.fetchBattery();
-                } catch (TelloCommandTimedOutException | TelloNetworkException | TelloCustomCommandException | TelloGeneralCommandException ignored) {
+                    drone.ping();
+                } catch (TelloCommandTimedOutException | TelloNetworkException | TelloCustomCommandException | TelloGeneralCommandException | TelloNoValidIMUException ignored) {
                 }
 
                 try {

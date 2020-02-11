@@ -610,4 +610,6 @@ public abstract class TelloDrone implements AutoCloseable {
     public void setVideoExportType(TelloVideoExportType videoExportType) {
         this.videoExportType = videoExportType;
     }
+
+    public abstract void ping() throws TelloCommandTimedOutException, TelloCustomCommandException, TelloNetworkException, TelloNoValidIMUException, TelloGeneralCommandException;
 }

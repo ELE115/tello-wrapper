@@ -18,6 +18,7 @@ package com.github.ele115.tello_wrapper.tello4j.wifi.impl.network;
 
 import com.github.ele115.tello_wrapper.tello4j.api.exception.*;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.WifiDrone;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.set.RemoteControlCommand;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.state.TelloStateThread;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.video.TelloVideoThread;
 import com.github.ele115.tello_wrapper.tello4j.wifi.model.TelloSDKValues;
@@ -36,7 +37,6 @@ public class TelloCommandConnection {
     DatagramSocket ds;
     InetAddress remoteAddress;
     boolean connectionState = false;
-    TelloCommandQueue queue;
     TelloStateThread stateThread;
     TelloVideoThread videoThread;
 
@@ -50,11 +50,11 @@ public class TelloCommandConnection {
     }
 
     public void connect(String remote) throws TelloNetworkException {
-        if(onceConnected)throw new TelloNetworkException("You can not reconnect by using connect(). Please build a new tello drone object.");
+        if (onceConnected)
+            throw new TelloNetworkException("You can not reconnect by using connect(). Please build a new tello drone object.");
         try {
             onceConnected = true;
             lastCommand = System.currentTimeMillis();
-            queue = new TelloCommandQueue(this);
             stateThread = new TelloStateThread(this);
             videoThread = new TelloVideoThread(this);
             this.remoteAddress = InetAddress.getByName(remote);
@@ -63,7 +63,6 @@ public class TelloCommandConnection {
             ds.connect(remoteAddress, TelloSDKValues.COMMAND_PORT);
             stateThread.connect();
             videoThread.connect();
-            queue.start();
             stateThread.start();
             videoThread.start();
             connectionState = true;
@@ -74,7 +73,6 @@ public class TelloCommandConnection {
 
     public void disconnect() {
         connectionState = false;
-        queue.kill();
         stateThread.kill();
         videoThread.kill();
         ds.disconnect();
@@ -82,32 +80,28 @@ public class TelloCommandConnection {
     }
 
     public TelloResponse sendCommand(TelloCommand cmd) throws TelloNetworkException, TelloCommandTimedOutException, TelloGeneralCommandException, TelloNoValidIMUException, TelloCustomCommandException {
-        if(lastCommand+TelloSDKValues.COMMAND_TIMEOUT<System.currentTimeMillis()){
-            throw new TelloConnectionTimedOutException();
-        }
-        lastCommand = System.currentTimeMillis();
-        synchronized (cmd) {
-            queue.queueCommand(cmd);
-            try {
-                cmd.wait(); //Wait for finish in command queue
-            } catch (InterruptedException e) {
-                throw new TelloNetworkException("\"" + cmd.serializeCommand() + "\" command was interrupted while executing it!");
+        send(cmd.serializeCommand());
+        //Read response, or assume ok with the remote control command
+        String data = cmd instanceof RemoteControlCommand ? "ok" : readString().trim();
+        int attempt = 0;
+        boolean invalid;
+        do {
+            invalid = data.startsWith("conn_ack");
+            if (!TelloSDKValues.COMMAND_REPLY_PATTERN.matcher(data).matches()) invalid = true;
+            if (invalid && TelloSDKValues.DEBUG) {
+                System.err.println("Dropping reply \"" + data + "\" as it might be binary");
             }
-        }
-        if (cmd.getException() != null) {
-            if (cmd.getException() instanceof TelloNetworkException) {
-                throw (TelloNetworkException) cmd.getException();
-            } else if (cmd.getException() instanceof TelloCommandTimedOutException) {
-                throw (TelloCommandTimedOutException) cmd.getException();
-            } else if (cmd.getException() instanceof TelloGeneralCommandException) {
-                throw (TelloGeneralCommandException) cmd.getException();
-            } else if (cmd.getException() instanceof TelloNoValidIMUException) {
-                throw (TelloNoValidIMUException) cmd.getException();
-            } else if (cmd.getException() instanceof TelloCustomCommandException) {
-                throw (TelloCustomCommandException) cmd.getException();
+            attempt++;
+            if (invalid && attempt >= TelloSDKValues.COMMAND_SOCKET_BINARY_ATTEMPTS) {
+                throw new TelloNetworkException("Too many binary messages received after sending command. Broken connection?");
             }
-        }
-        if (cmd.getResponse() == null) {
+            if (invalid) {
+                data = readString().trim();
+            }
+        } while (invalid);
+        TelloResponse response = cmd.buildResponse(data);
+        cmd.setResponse(response);
+        if (response == null) {
             throw new TelloNetworkException("\"" + cmd.serializeCommand() + "\" command was not answered!");
         }
         return cmd.getResponse();
@@ -165,7 +159,7 @@ public class TelloCommandConnection {
     }
 
     public boolean isConnected() {
-        return connectionState && (lastCommand+TelloSDKValues.COMMAND_TIMEOUT) > System.currentTimeMillis();
+        return connectionState && (lastCommand + TelloSDKValues.COMMAND_TIMEOUT) > System.currentTimeMillis();
     }
 
     public WifiDrone getDrone() {

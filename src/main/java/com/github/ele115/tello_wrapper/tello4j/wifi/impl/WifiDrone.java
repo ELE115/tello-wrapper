@@ -21,6 +21,7 @@ import com.github.ele115.tello_wrapper.tello4j.api.exception.*;
 import com.github.ele115.tello_wrapper.tello4j.api.world.FlipDirection;
 import com.github.ele115.tello_wrapper.tello4j.api.world.MovementDirection;
 import com.github.ele115.tello_wrapper.tello4j.api.world.TurnDirection;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.PingCommand;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.control.*;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.read.*;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.set.RemoteControlCommand;
@@ -225,5 +226,10 @@ public class WifiDrone extends TelloDrone {
 
     public int fetchWifiSnr() throws TelloCommandTimedOutException, TelloNetworkException, TelloCustomCommandException, TelloGeneralCommandException {
         return (int) fetch(new ReadWifiSNRCommand())[0];
+    }
+
+    @Override
+    public void ping() throws TelloCommandTimedOutException, TelloCustomCommandException, TelloNetworkException, TelloNoValidIMUException, TelloGeneralCommandException {
+        this.commandConnection.sendCommand(new PingCommand());
     }
 }
