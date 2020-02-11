@@ -10,7 +10,7 @@ import com.github.ele115.tello_wrapper.tello4j.wifi.model.response.TelloResponse
 public class PingCommand extends TelloCommand {
     @Override
     public String serializeCommand() {
-        return "ping";
+        return "-- ping --";
     }
 
     @Override

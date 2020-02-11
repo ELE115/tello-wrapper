@@ -33,21 +33,21 @@ public class TelloStateDeserializer {
             int pitch = 0, roll = 0, yaw = 0, speedX = 0, speedY = 0, speedZ = 0, tempLow = 0, tempHigh = 0, tofDistance = 0, height = 0, battery = 0, motorTime = 0;
             double barometer = 0, accelerationX = 0, accelerationY = 0, accelerationZ = 0;
             String[] arguments = state.trim().split(";");
-            for (int i = 0; i < arguments.length; i++) {
+            for (int i = 5; i < arguments.length; i++) {
                 String number = arguments[i].split(":")[1];
                 if (number.contains(".")) {
                     double value = Double.parseDouble(number);
                     switch (i) {
-                        case 11:
+                        case 16:
                             barometer = value;
                             break;
-                        case 13:
+                        case 18:
                             accelerationX = value;
                             break;
-                        case 14:
+                        case 19:
                             accelerationY = value;
                             break;
-                        case 15:
+                        case 20:
                             accelerationZ = value;
                             break;
                         default:
@@ -56,40 +56,40 @@ public class TelloStateDeserializer {
                 } else {
                     int value = Integer.parseInt(number);
                     switch (i) {
-                        case 0:
+                        case 5:
                             pitch = value;
                             break;
-                        case 1:
+                        case 6:
                             roll = value;
                             break;
-                        case 2:
+                        case 7:
                             yaw = value;
                             break;
-                        case 3:
+                        case 8:
                             speedX = value;
                             break;
-                        case 4:
+                        case 9:
                             speedY = value;
                             break;
-                        case 5:
+                        case 10:
                             speedZ = value;
                             break;
-                        case 6:
+                        case 11:
                             tempLow = value;
                             break;
-                        case 7:
+                        case 12:
                             tempHigh = value;
                             break;
-                        case 8:
+                        case 13:
                             tofDistance = value;
                             break;
-                        case 9:
+                        case 14:
                             height = value;
                             break;
-                        case 10:
+                        case 15:
                             battery = value;
                             break;
-                        case 12:
+                        case 17:
                             motorTime = value;
                             break;
                         default:

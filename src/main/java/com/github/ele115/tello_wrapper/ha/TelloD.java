@@ -50,24 +50,27 @@ class TelloD {
 
     private class ExecuteThread extends Thread {
         private final Callable<Boolean> f;
-        public final Predicate<TelloDroneState> p;
+        private final AtomicBoolean stop;
+        private final StateListener listener;
 
         private ExecuteThread(Callable<Boolean> f, Predicate<TelloDroneState> p) {
             this.f = f;
-            this.p = p;
+            this.stop = new AtomicBoolean();
+            this.listener = (oldState, newState) -> {
+                if (p.test(newState)) {
+                    System.err.println("valid"); // FIXME
+                    removeListener();
+                    stop.set(true);
+                }
+            };
+        }
+
+        private void removeListener() {
+            drone.removeStateListener(listener);
         }
 
         public void run() {
-            var stop = new AtomicBoolean(false);
-            var l = new StateListener() {
-                @Override
-                public void onStateChanged(TelloDroneState oldState, TelloDroneState newState) {
-                    if (p.test(newState))
-                        System.err.println("valid"); // FIXME
-                    stop.set(!p.test(newState));
-                }
-            };
-            drone.addStateListener(l);
+            drone.addStateListener(listener);
             Thread th;
             w:
             while (true) {
@@ -75,8 +78,8 @@ class TelloD {
                     try {
                         System.err.println("issue"); // FIXME
                         if (f.call()) {
-                            stop.set(true);
                             System.err.println("short cut"); // FIXME
+                            stop.set(true);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -96,7 +99,7 @@ class TelloD {
                 th.join();
             } catch (InterruptedException ignored) {
             }
-            drone.removeStateListener(l);
+            removeListener();
             System.err.println("passed"); // FIXME
         }
     }

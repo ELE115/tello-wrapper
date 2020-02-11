@@ -68,6 +68,10 @@ public class TelloDroneState {
         return speedZ;
     }
 
+    public double getSpeed() {
+        return Math.sqrt(speedX * speedX + speedY * speedY + speedZ * speedZ);
+    }
+
     public int getTempLow() {
         return tempLow;
     }

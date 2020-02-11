@@ -59,7 +59,7 @@ public class TelloAdapter implements ITelloDrone {
     public void takeoff() {
         // FIXME
         drone.addStateListener((oldState, newState) -> {
-            System.err.printf("height=%d yaw=%d tof=%d\n", newState.getHeight(), newState.getYaw(), newState.getTofDistance());
+            System.err.printf("height=%d yaw=%d vgx=%d vgy=%d vgz=%d ax=%f ay=%f az=%f\n", newState.getHeight(), newState.getYaw(), newState.getSpeedX(), newState.getSpeedY(), newState.getSpeedZ(), newState.getAccelerationX(), newState.getAccelerationY(), newState.getAccelerationZ());
         });
         telloD.preventLanding();
         telloD.execute(() -> {
@@ -94,7 +94,7 @@ public class TelloAdapter implements ITelloDrone {
             } catch (TelloGeneralCommandException e) {
                 throw new RuntimeException("General error", e);
             }
-        }, (oldState, newState) -> newState.getHeight() < 5);
+        }, (oldState, newState) -> newState.getHeight() < 10);
     }
 
     @Override
@@ -152,7 +152,7 @@ public class TelloAdapter implements ITelloDrone {
             } catch (TelloNoValidIMUException e) {
                 throw new RuntimeException("IMU error", e);
             }
-        }, (oldState, newState) -> newState.getTofDistance() - oldState.getTofDistance() > 10);
+        }, (oldState, newState) -> newState.getSpeed() > 0);
     }
 
     @Override
@@ -172,24 +172,27 @@ public class TelloAdapter implements ITelloDrone {
             } catch (TelloNoValidIMUException e) {
                 throw new RuntimeException("IMU error", e);
             }
-        }, (oldState, newState) -> Math.abs(newState.getYaw() - oldState.getYaw()) > 10);
+        }, (oldState, newState) -> Math.abs(newState.getYaw() - oldState.getYaw()) > Math.abs(degrees) / 2);
     }
 
     @Override
     public void flip(FlipDirection direction) {
-        try {
-            drone.flip(direction);
-        } catch (TelloNetworkException e) {
-            throw new RuntimeException("Network error", e);
-        } catch (TelloCommandTimedOutException ignore) {
-            // TODO
-        } catch (TelloCustomCommandException e) {
-            throw new RuntimeException("Custom error", e);
-        } catch (TelloGeneralCommandException e) {
-            throw new RuntimeException("General error", e);
-        } catch (TelloNoValidIMUException e) {
-            throw new RuntimeException("IMU error", e);
-        }
+        telloD.execute(() -> {
+            try {
+                drone.flip(direction);
+                return true;
+            } catch (TelloNetworkException e) {
+                throw new RuntimeException("Network error", e);
+            } catch (TelloCommandTimedOutException ignore) {
+                return false;
+            } catch (TelloCustomCommandException e) {
+                throw new RuntimeException("Custom error", e);
+            } catch (TelloGeneralCommandException e) {
+                throw new RuntimeException("General error", e);
+            } catch (TelloNoValidIMUException e) {
+                throw new RuntimeException("IMU error", e);
+            }
+        }, (oldState, newState) -> Math.abs(newState.getSpeedZ()) > 6);
     }
 
     @Override
@@ -209,7 +212,7 @@ public class TelloAdapter implements ITelloDrone {
             } catch (TelloNoValidIMUException e) {
                 throw new RuntimeException("IMU error", e);
             }
-        }, (oldState, newState) -> newState.getTofDistance() - oldState.getTofDistance() > 10);
+        }, (oldState, newState) -> newState.getSpeed() > 0);
     }
 
     @Override
@@ -229,7 +232,7 @@ public class TelloAdapter implements ITelloDrone {
             } catch (TelloNoValidIMUException e) {
                 throw new RuntimeException("IMU error", e);
             }
-        }, (oldState, newState) -> newState.getTofDistance() - oldState.getTofDistance() > 10);
+        }, (oldState, newState) -> newState.getSpeed() > 0);
     }
 
     @Override
@@ -262,7 +265,7 @@ public class TelloAdapter implements ITelloDrone {
             } catch (TelloGeneralCommandException e) {
                 throw new RuntimeException("General error", e);
             }
-        }, (oldState, newState) -> newState.getTofDistance() - oldState.getTofDistance() > 10);
+        }, (oldState, newState) -> newState.getSpeed() > 0);
     }
 
     @Override
@@ -467,7 +470,7 @@ public class TelloAdapter implements ITelloDrone {
             } catch (TelloNoValidIMUException e) {
                 throw new RuntimeException("IMU error", e);
             }
-        }, (oldState, newState) -> newState.getHeight() - oldState.getHeight() < -10);
+        }, (oldState, newState) -> newState.getHeight() - oldState.getHeight() < -5);
     }
 
     @Override
@@ -487,7 +490,7 @@ public class TelloAdapter implements ITelloDrone {
             } catch (TelloNoValidIMUException e) {
                 throw new RuntimeException("IMU error", e);
             }
-        }, (oldState, newState) -> newState.getTofDistance() - oldState.getTofDistance() > 10);
+        }, (oldState, newState) -> newState.getSpeed() > 0);
     }
 
     @Override
@@ -507,7 +510,7 @@ public class TelloAdapter implements ITelloDrone {
             } catch (TelloNoValidIMUException e) {
                 throw new RuntimeException("IMU error", e);
             }
-        }, (oldState, newState) -> newState.getTofDistance() - oldState.getTofDistance() > 10);
+        }, (oldState, newState) -> newState.getSpeed() > 0);
     }
 
     @Override
@@ -527,7 +530,7 @@ public class TelloAdapter implements ITelloDrone {
             } catch (TelloNoValidIMUException e) {
                 throw new RuntimeException("IMU error", e);
             }
-        }, (oldState, newState) -> newState.getTofDistance() - oldState.getTofDistance() > 10);
+        }, (oldState, newState) -> newState.getSpeed() > 0);
     }
 
     @Override
@@ -547,7 +550,7 @@ public class TelloAdapter implements ITelloDrone {
             } catch (TelloNoValidIMUException e) {
                 throw new RuntimeException("IMU error", e);
             }
-        }, (oldState, newState) -> newState.getTofDistance() - oldState.getTofDistance() > 10);
+        }, (oldState, newState) -> newState.getSpeed() > 0);
     }
 
     @Override
@@ -567,7 +570,7 @@ public class TelloAdapter implements ITelloDrone {
             } catch (TelloNoValidIMUException e) {
                 throw new RuntimeException("IMU error", e);
             }
-        }, (oldState, newState) -> Math.abs(newState.getYaw() - oldState.getYaw()) > 10);
+        }, (oldState, newState) -> Math.abs(newState.getYaw() - oldState.getYaw()) > degrees / 2);
     }
 
     @Override
@@ -587,7 +590,7 @@ public class TelloAdapter implements ITelloDrone {
             } catch (TelloNoValidIMUException e) {
                 throw new RuntimeException("IMU error", e);
             }
-        }, (oldState, newState) -> Math.abs(newState.getYaw() - oldState.getYaw()) > 10);
+        }, (oldState, newState) -> Math.abs(newState.getYaw() - oldState.getYaw()) > degrees / 2);
     }
 
     @Override

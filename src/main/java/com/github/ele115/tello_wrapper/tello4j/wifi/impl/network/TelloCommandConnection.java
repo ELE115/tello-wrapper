@@ -18,6 +18,7 @@ package com.github.ele115.tello_wrapper.tello4j.wifi.impl.network;
 
 import com.github.ele115.tello_wrapper.tello4j.api.exception.*;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.WifiDrone;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.PingCommand;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.set.RemoteControlCommand;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.state.TelloStateThread;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.video.TelloVideoThread;
@@ -81,19 +82,16 @@ public class TelloCommandConnection {
 
     public TelloResponse sendCommand(TelloCommand cmd) throws TelloNetworkException, TelloCommandTimedOutException, TelloGeneralCommandException, TelloNoValidIMUException, TelloCustomCommandException {
         send(cmd.serializeCommand());
+        if (cmd instanceof PingCommand)
+            return null;
         //Read response, or assume ok with the remote control command
         String data = cmd instanceof RemoteControlCommand ? "ok" : readString().trim();
-        int attempt = 0;
         boolean invalid;
         do {
             invalid = data.startsWith("conn_ack");
             if (!TelloSDKValues.COMMAND_REPLY_PATTERN.matcher(data).matches()) invalid = true;
             if (invalid && TelloSDKValues.DEBUG) {
                 System.err.println("Dropping reply \"" + data + "\" as it might be binary");
-            }
-            attempt++;
-            if (invalid && attempt >= TelloSDKValues.COMMAND_SOCKET_BINARY_ATTEMPTS) {
-                throw new TelloNetworkException("Too many binary messages received after sending command. Broken connection?");
             }
             if (invalid) {
                 data = readString().trim();
