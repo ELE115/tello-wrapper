@@ -14,10 +14,10 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.wifi.impl.command.control;
+package com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.control;
 
-import me.friwi.tello4j.api.world.FlipDirection;
-import me.friwi.tello4j.wifi.model.command.ControlCommand;
+import com.github.ele115.tello_wrapper.tello4j.api.world.FlipDirection;
+import com.github.ele115.tello_wrapper.tello4j.wifi.model.command.ControlCommand;
 
 public class FlipCommand extends ControlCommand {
     private FlipDirection direction;

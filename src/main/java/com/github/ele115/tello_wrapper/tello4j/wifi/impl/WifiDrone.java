@@ -14,23 +14,23 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.wifi.impl;
+package com.github.ele115.tello_wrapper.tello4j.wifi.impl;
 
-import me.friwi.tello4j.api.drone.TelloDrone;
-import me.friwi.tello4j.api.exception.*;
-import me.friwi.tello4j.api.world.FlipDirection;
-import me.friwi.tello4j.api.world.MovementDirection;
-import me.friwi.tello4j.api.world.TurnDirection;
-import me.friwi.tello4j.wifi.impl.command.control.*;
-import me.friwi.tello4j.wifi.impl.command.read.*;
-import me.friwi.tello4j.wifi.impl.command.set.RemoteControlCommand;
-import me.friwi.tello4j.wifi.impl.command.set.SetSpeedCommand;
-import me.friwi.tello4j.wifi.impl.command.set.SetWifiPasswordAndSSIDCommand;
-import me.friwi.tello4j.wifi.impl.network.TelloCommandConnection;
-import me.friwi.tello4j.wifi.impl.response.TelloReadCommandResponse;
-import me.friwi.tello4j.wifi.model.TelloSDKValues;
-import me.friwi.tello4j.wifi.model.command.ReadCommand;
-import me.friwi.tello4j.wifi.model.response.TelloResponse;
+import com.github.ele115.tello_wrapper.tello4j.api.drone.TelloDrone;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.*;
+import com.github.ele115.tello_wrapper.tello4j.api.world.FlipDirection;
+import com.github.ele115.tello_wrapper.tello4j.api.world.MovementDirection;
+import com.github.ele115.tello_wrapper.tello4j.api.world.TurnDirection;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.control.*;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.read.*;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.set.RemoteControlCommand;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.set.SetSpeedCommand;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.set.SetWifiPasswordAndSSIDCommand;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.network.TelloCommandConnection;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.response.TelloReadCommandResponse;
+import com.github.ele115.tello_wrapper.tello4j.wifi.model.TelloSDKValues;
+import com.github.ele115.tello_wrapper.tello4j.wifi.model.command.ReadCommand;
+import com.github.ele115.tello_wrapper.tello4j.wifi.model.response.TelloResponse;
 
 public class WifiDrone extends TelloDrone {
     private TelloCommandConnection commandConnection;

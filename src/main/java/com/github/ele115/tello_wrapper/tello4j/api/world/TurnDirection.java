@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.api.world;
+package com.github.ele115.tello_wrapper.tello4j.api.world;
 
 /**
  * This enum represents all possible directions the drone can rotate

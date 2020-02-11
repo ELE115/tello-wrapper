@@ -14,11 +14,11 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.wifi.impl.command.control;
+package com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.control;
 
-import me.friwi.tello4j.api.world.TurnDirection;
-import me.friwi.tello4j.util.TelloArgumentVerifier;
-import me.friwi.tello4j.wifi.model.command.ControlCommand;
+import com.github.ele115.tello_wrapper.tello4j.api.world.TurnDirection;
+import com.github.ele115.tello_wrapper.tello4j.util.TelloArgumentVerifier;
+import com.github.ele115.tello_wrapper.tello4j.wifi.model.command.ControlCommand;
 
 public class TurnCommand extends ControlCommand {
     private TurnDirection direction;

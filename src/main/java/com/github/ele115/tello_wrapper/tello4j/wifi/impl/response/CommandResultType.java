@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.wifi.impl.response;
+package com.github.ele115.tello_wrapper.tello4j.wifi.impl.response;
 
 public enum CommandResultType {
     OK,

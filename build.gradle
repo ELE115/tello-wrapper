@@ -15,7 +15,7 @@ sourceCompatibility = 1.11
 targetCompatibility = 1.11
 
 dependencies {
-    api 'me.friwi:tello4j:1.0.2'
+    implementation 'org.bytedeco:javacv-platform:1.5.2'
     implementation 'com.github.b1f6c1c4:mac-to-ip:1.0.0'
 }
 

@@ -14,10 +14,10 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.wifi.impl.video;
+package com.github.ele115.tello_wrapper.tello4j.wifi.impl.video;
 
-import me.friwi.tello4j.api.video.TelloVideoFrame;
-import me.friwi.tello4j.api.video.VideoListener;
+import com.github.ele115.tello_wrapper.tello4j.api.video.TelloVideoFrame;
+import com.github.ele115.tello_wrapper.tello4j.api.video.VideoListener;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 

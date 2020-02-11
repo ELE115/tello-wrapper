@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.api.exception;
+package com.github.ele115.tello_wrapper.tello4j.api.exception;
 
 /**
  * Class that unifies all exceptions thrown by this library.

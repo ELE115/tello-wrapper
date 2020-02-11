@@ -14,10 +14,10 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.wifi.model.command;
+package com.github.ele115.tello_wrapper.tello4j.wifi.model.command;
 
-import me.friwi.tello4j.api.exception.*;
-import me.friwi.tello4j.wifi.model.response.TelloResponse;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.*;
+import com.github.ele115.tello_wrapper.tello4j.wifi.model.response.TelloResponse;
 
 public abstract class TelloCommand {
     private TelloResponse response;

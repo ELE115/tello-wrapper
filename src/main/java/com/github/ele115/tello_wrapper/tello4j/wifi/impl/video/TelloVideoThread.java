@@ -14,12 +14,12 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.wifi.impl.video;
+package com.github.ele115.tello_wrapper.tello4j.wifi.impl.video;
 
-import me.friwi.tello4j.api.exception.TelloException;
-import me.friwi.tello4j.api.exception.TelloNetworkException;
-import me.friwi.tello4j.wifi.impl.network.TelloCommandConnection;
-import me.friwi.tello4j.wifi.model.TelloSDKValues;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloException;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloNetworkException;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.network.TelloCommandConnection;
+import com.github.ele115.tello_wrapper.tello4j.wifi.model.TelloSDKValues;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -30,7 +30,7 @@ import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.List;
 
-import static me.friwi.tello4j.wifi.model.TelloSDKValues.STREAM_DEFAULT_PACKET_SIZE;
+import static com.github.ele115.tello_wrapper.tello4j.wifi.model.TelloSDKValues.STREAM_DEFAULT_PACKET_SIZE;
 
 public class TelloVideoThread extends Thread {
     boolean running = true;

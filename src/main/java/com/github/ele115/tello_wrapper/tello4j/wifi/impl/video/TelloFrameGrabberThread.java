@@ -14,18 +14,18 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.wifi.impl.video;
+package com.github.ele115.tello_wrapper.tello4j.wifi.impl.video;
 
-import me.friwi.tello4j.api.video.TelloVideoFrame;
-import me.friwi.tello4j.wifi.model.TelloSDKValues;
+import com.github.ele115.tello_wrapper.tello4j.api.video.TelloVideoFrame;
+import com.github.ele115.tello_wrapper.tello4j.wifi.model.TelloSDKValues;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.Java2DFrameConverter;
 
-import static me.friwi.tello4j.wifi.model.TelloSDKValues.VIDEO_HEIGHT;
-import static me.friwi.tello4j.wifi.model.TelloSDKValues.VIDEO_WIDTH;
+import static com.github.ele115.tello_wrapper.tello4j.wifi.model.TelloSDKValues.VIDEO_HEIGHT;
+import static com.github.ele115.tello_wrapper.tello4j.wifi.model.TelloSDKValues.VIDEO_WIDTH;
 
 public class TelloFrameGrabberThread extends Thread {
     private TelloVideoThread videoThread;

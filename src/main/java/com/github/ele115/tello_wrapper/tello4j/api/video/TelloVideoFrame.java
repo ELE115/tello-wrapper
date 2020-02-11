@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.api.video;
+package com.github.ele115.tello_wrapper.tello4j.api.video;
 
 import org.bytedeco.javacv.Frame;
 

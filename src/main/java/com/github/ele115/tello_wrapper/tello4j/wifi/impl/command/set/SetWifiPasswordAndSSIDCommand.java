@@ -14,9 +14,9 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.wifi.impl.command.set;
+package com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.set;
 
-import me.friwi.tello4j.wifi.model.command.SetCommand;
+import com.github.ele115.tello_wrapper.tello4j.wifi.model.command.SetCommand;
 
 public class SetWifiPasswordAndSSIDCommand extends SetCommand {
     private String ssid, password;

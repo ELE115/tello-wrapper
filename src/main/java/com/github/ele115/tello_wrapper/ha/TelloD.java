@@ -1,12 +1,12 @@
 package com.github.ele115.tello_wrapper.ha;
 
-import me.friwi.tello4j.api.drone.TelloDrone;
-import me.friwi.tello4j.api.exception.TelloCommandTimedOutException;
-import me.friwi.tello4j.api.exception.TelloCustomCommandException;
-import me.friwi.tello4j.api.exception.TelloGeneralCommandException;
-import me.friwi.tello4j.api.exception.TelloNetworkException;
-import me.friwi.tello4j.api.state.StateListener;
-import me.friwi.tello4j.api.state.TelloDroneState;
+import com.github.ele115.tello_wrapper.tello4j.api.drone.TelloDrone;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloCommandTimedOutException;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloCustomCommandException;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloGeneralCommandException;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloNetworkException;
+import com.github.ele115.tello_wrapper.tello4j.api.state.StateListener;
+import com.github.ele115.tello_wrapper.tello4j.api.state.TelloDroneState;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;

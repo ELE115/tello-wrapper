@@ -14,9 +14,9 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.api.video;
+package com.github.ele115.tello_wrapper.tello4j.api.video;
 
-import me.friwi.tello4j.api.drone.TelloDrone;
+import com.github.ele115.tello_wrapper.tello4j.api.drone.TelloDrone;
 
 /**
  * A VideoListener receives video data in the form of {@link TelloVideoFrame}s.

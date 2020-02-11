@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.wifi.model.command;
+package com.github.ele115.tello_wrapper.tello4j.wifi.model.command;
 
 public abstract class SetCommand extends TelloResultCommand {
     public SetCommand(String cmd) {

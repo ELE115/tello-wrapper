@@ -14,14 +14,14 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.wifi.impl.state;
+package com.github.ele115.tello_wrapper.tello4j.wifi.impl.state;
 
-import me.friwi.tello4j.api.exception.TelloException;
-import me.friwi.tello4j.api.exception.TelloNetworkException;
-import me.friwi.tello4j.api.state.StateListener;
-import me.friwi.tello4j.api.state.TelloDroneState;
-import me.friwi.tello4j.wifi.impl.network.TelloCommandConnection;
-import me.friwi.tello4j.wifi.model.TelloSDKValues;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloException;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloNetworkException;
+import com.github.ele115.tello_wrapper.tello4j.api.state.StateListener;
+import com.github.ele115.tello_wrapper.tello4j.api.state.TelloDroneState;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.network.TelloCommandConnection;
+import com.github.ele115.tello_wrapper.tello4j.wifi.model.TelloSDKValues;
 
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;

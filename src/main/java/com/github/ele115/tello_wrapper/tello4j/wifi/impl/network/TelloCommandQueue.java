@@ -14,14 +14,14 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.wifi.impl.network;
+package com.github.ele115.tello_wrapper.tello4j.wifi.impl.network;
 
-import me.friwi.tello4j.api.exception.TelloException;
-import me.friwi.tello4j.api.exception.TelloNetworkException;
-import me.friwi.tello4j.wifi.impl.command.set.RemoteControlCommand;
-import me.friwi.tello4j.wifi.model.TelloSDKValues;
-import me.friwi.tello4j.wifi.model.command.TelloCommand;
-import me.friwi.tello4j.wifi.model.response.TelloResponse;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloException;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloNetworkException;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.set.RemoteControlCommand;
+import com.github.ele115.tello_wrapper.tello4j.wifi.model.TelloSDKValues;
+import com.github.ele115.tello_wrapper.tello4j.wifi.model.command.TelloCommand;
+import com.github.ele115.tello_wrapper.tello4j.wifi.model.response.TelloResponse;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 

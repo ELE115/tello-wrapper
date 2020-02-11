@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.api.state;
+package com.github.ele115.tello_wrapper.tello4j.api.state;
 
 /**
  * This class represents one full state of the tello drone

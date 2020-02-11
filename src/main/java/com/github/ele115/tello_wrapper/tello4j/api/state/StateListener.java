@@ -14,9 +14,9 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.api.state;
+package com.github.ele115.tello_wrapper.tello4j.api.state;
 
-import me.friwi.tello4j.api.drone.TelloDrone;
+import com.github.ele115.tello_wrapper.tello4j.api.drone.TelloDrone;
 
 /**
  * Listener used to receive state updates from the {@link TelloDrone}

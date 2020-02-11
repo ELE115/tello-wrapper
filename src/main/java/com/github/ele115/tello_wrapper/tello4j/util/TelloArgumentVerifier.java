@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.util;
+package com.github.ele115.tello_wrapper.tello4j.util;
 
 public class TelloArgumentVerifier {
     public static void checkRange(int x, int min, int max, String description) {

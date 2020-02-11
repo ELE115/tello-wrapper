@@ -14,15 +14,15 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.wifi.model.command;
+package com.github.ele115.tello_wrapper.tello4j.wifi.model.command;
 
-import me.friwi.tello4j.api.exception.TelloCustomCommandException;
-import me.friwi.tello4j.api.exception.TelloGeneralCommandException;
-import me.friwi.tello4j.api.exception.TelloNetworkException;
-import me.friwi.tello4j.api.exception.TelloNoValidIMUException;
-import me.friwi.tello4j.wifi.impl.response.CommandResultType;
-import me.friwi.tello4j.wifi.impl.response.TelloReadCommandResponse;
-import me.friwi.tello4j.wifi.model.response.TelloResponse;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloCustomCommandException;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloGeneralCommandException;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloNetworkException;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloNoValidIMUException;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.response.CommandResultType;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.response.TelloReadCommandResponse;
+import com.github.ele115.tello_wrapper.tello4j.wifi.model.response.TelloResponse;
 
 public abstract class ReadCommand extends TelloCommand {
     private String command;

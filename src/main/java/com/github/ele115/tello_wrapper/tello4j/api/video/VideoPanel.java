@@ -14,15 +14,15 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.api.video;
+package com.github.ele115.tello_wrapper.tello4j.api.video;
 
 import org.bytedeco.javacv.Java2DFrameConverter;
 
 import javax.swing.*;
 import java.awt.*;
 
-import static me.friwi.tello4j.wifi.model.TelloSDKValues.VIDEO_HEIGHT;
-import static me.friwi.tello4j.wifi.model.TelloSDKValues.VIDEO_WIDTH;
+import static com.github.ele115.tello_wrapper.tello4j.wifi.model.TelloSDKValues.VIDEO_HEIGHT;
+import static com.github.ele115.tello_wrapper.tello4j.wifi.model.TelloSDKValues.VIDEO_WIDTH;
 
 /**
  * A simple {@link VideoListener} in the form of a {@link JPanel}, that draws all received images to itself.

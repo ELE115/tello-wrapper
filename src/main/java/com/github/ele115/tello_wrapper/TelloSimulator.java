@@ -1,12 +1,12 @@
 package com.github.ele115.tello_wrapper;
 
-import me.friwi.tello4j.api.state.StateListener;
-import me.friwi.tello4j.api.state.TelloDroneState;
-import me.friwi.tello4j.api.video.TelloVideoExportType;
-import me.friwi.tello4j.api.video.VideoListener;
-import me.friwi.tello4j.api.world.FlipDirection;
-import me.friwi.tello4j.api.world.MovementDirection;
-import me.friwi.tello4j.api.world.TurnDirection;
+import com.github.ele115.tello_wrapper.tello4j.api.state.StateListener;
+import com.github.ele115.tello_wrapper.tello4j.api.state.TelloDroneState;
+import com.github.ele115.tello_wrapper.tello4j.api.video.TelloVideoExportType;
+import com.github.ele115.tello_wrapper.tello4j.api.video.VideoListener;
+import com.github.ele115.tello_wrapper.tello4j.api.world.FlipDirection;
+import com.github.ele115.tello_wrapper.tello4j.api.world.MovementDirection;
+import com.github.ele115.tello_wrapper.tello4j.api.world.TurnDirection;
 
 import java.io.IOException;
 import java.nio.file.Files;

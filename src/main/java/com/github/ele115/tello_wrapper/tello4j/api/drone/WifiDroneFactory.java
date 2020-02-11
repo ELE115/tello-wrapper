@@ -14,9 +14,9 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.api.drone;
+package com.github.ele115.tello_wrapper.tello4j.api.drone;
 
-import me.friwi.tello4j.wifi.impl.WifiDrone;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.WifiDrone;
 
 /**
  * A factory to create a new {@link TelloDrone}, which is connected by wifi

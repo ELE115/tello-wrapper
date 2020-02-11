@@ -14,24 +14,24 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.api.drone;
+package com.github.ele115.tello_wrapper.tello4j.api.drone;
 
-import me.friwi.tello4j.api.exception.*;
-import me.friwi.tello4j.api.state.StateListener;
-import me.friwi.tello4j.api.state.TelloDroneState;
-import me.friwi.tello4j.api.video.TelloVideoExportType;
-import me.friwi.tello4j.api.video.TelloVideoFrame;
-import me.friwi.tello4j.api.video.VideoListener;
-import me.friwi.tello4j.api.world.FlipDirection;
-import me.friwi.tello4j.api.world.MovementDirection;
-import me.friwi.tello4j.api.world.TurnDirection;
+import com.github.ele115.tello_wrapper.tello4j.api.exception.*;
+import com.github.ele115.tello_wrapper.tello4j.api.state.StateListener;
+import com.github.ele115.tello_wrapper.tello4j.api.state.TelloDroneState;
+import com.github.ele115.tello_wrapper.tello4j.api.video.TelloVideoExportType;
+import com.github.ele115.tello_wrapper.tello4j.api.video.TelloVideoFrame;
+import com.github.ele115.tello_wrapper.tello4j.api.video.VideoListener;
+import com.github.ele115.tello_wrapper.tello4j.api.world.FlipDirection;
+import com.github.ele115.tello_wrapper.tello4j.api.world.MovementDirection;
+import com.github.ele115.tello_wrapper.tello4j.api.world.TurnDirection;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * This class represents all tello drones with their possible sdk actions and their current data.
- * You can construct a tello drone by using a tello drone factory (e.g. {@link me.friwi.tello4j.api.drone.WifiDroneFactory}).
+ * You can construct a tello drone by using a tello drone factory (e.g. {@link com.github.ele115.tello_wrapper.tello4j.api.drone.WifiDroneFactory}).
  *
  * @author Fritz Windisch
  */

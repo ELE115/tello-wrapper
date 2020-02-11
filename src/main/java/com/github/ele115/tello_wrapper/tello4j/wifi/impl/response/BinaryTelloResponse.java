@@ -14,10 +14,10 @@
  *    limitations under the License.
  */
 
-package me.friwi.tello4j.wifi.impl.response;
+package com.github.ele115.tello_wrapper.tello4j.wifi.impl.response;
 
-import me.friwi.tello4j.wifi.model.command.TelloCommand;
-import me.friwi.tello4j.wifi.model.response.TelloResponse;
+import com.github.ele115.tello_wrapper.tello4j.wifi.model.command.TelloCommand;
+import com.github.ele115.tello_wrapper.tello4j.wifi.model.response.TelloResponse;
 
 public class BinaryTelloResponse extends TelloResponse {
     public BinaryTelloResponse(TelloCommand command, CommandResultType commandResultType, String message) {
