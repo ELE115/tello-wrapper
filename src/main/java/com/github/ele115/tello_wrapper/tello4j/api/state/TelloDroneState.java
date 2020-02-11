@@ -22,16 +22,17 @@ package com.github.ele115.tello_wrapper.tello4j.api.state;
  * @author Fritz Windisch
  */
 public class TelloDroneState {
-    private int pitch, roll, yaw, speedX, speedY, speedZ, tempLow, tempHigh, tofDistance, height, battery, motorTime;
+    private int pitch, roll, yaw, speedX, speedY, speedZ, rotZ, tempLow, tempHigh, tofDistance, height, battery, motorTime;
     private double barometer, accelerationX, accelerationY, accelerationZ;
 
-    public TelloDroneState(int pitch, int roll, int yaw, int speedX, int speedY, int speedZ, int tempLow, int tempHigh, int tofDistance, int height, int battery, int motorTime, double barometer, double accelerationX, double accelerationY, double accelerationZ) {
+    public TelloDroneState(int pitch, int roll, int yaw, int speedX, int speedY, int speedZ, int rotZ, int tempLow, int tempHigh, int tofDistance, int height, int battery, int motorTime, double barometer, double accelerationX, double accelerationY, double accelerationZ) {
         this.pitch = pitch;
         this.roll = roll;
         this.yaw = yaw;
         this.speedX = speedX;
         this.speedY = speedY;
         this.speedZ = speedZ;
+        this.rotZ = rotZ;
         this.tempLow = tempLow;
         this.tempHigh = tempHigh;
         this.tofDistance = tofDistance;
@@ -70,6 +71,14 @@ public class TelloDroneState {
 
     public double getSpeed() {
         return Math.sqrt(speedX * speedX + speedY * speedY + speedZ * speedZ);
+    }
+
+    public double getRotZ() {
+        return rotZ;
+    }
+
+    public boolean isStable() {
+        return getSpeed() < 1 && Math.abs(rotZ) <= 3;
     }
 
     public int getTempLow() {

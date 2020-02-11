@@ -17,8 +17,8 @@
 package com.github.ele115.tello_wrapper.tello4j.wifi.impl.network;
 
 import com.github.ele115.tello_wrapper.tello4j.api.exception.*;
+import com.github.ele115.tello_wrapper.tello4j.api.state.TelloDroneState;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.WifiDrone;
-import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.PingCommand;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.set.RemoteControlCommand;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.state.TelloStateThread;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.video.TelloVideoThread;
@@ -33,6 +33,9 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 public class TelloCommandConnection {
     DatagramSocket ds;
@@ -40,6 +43,8 @@ public class TelloCommandConnection {
     boolean connectionState = false;
     TelloStateThread stateThread;
     TelloVideoThread videoThread;
+    ReceiveThread receiveThread;
+    BlockingQueue<String> qString;
 
     WifiDrone drone;
 
@@ -58,6 +63,7 @@ public class TelloCommandConnection {
             lastCommand = System.currentTimeMillis();
             stateThread = new TelloStateThread(this);
             videoThread = new TelloVideoThread(this);
+            receiveThread = new ReceiveThread();
             this.remoteAddress = InetAddress.getByName(remote);
             ds = new DatagramSocket(TelloSDKValues.COMMAND_PORT);
             ds.setSoTimeout(TelloSDKValues.COMMAND_SOCKET_TIMEOUT);
@@ -66,6 +72,7 @@ public class TelloCommandConnection {
             videoThread.connect();
             stateThread.start();
             videoThread.start();
+            receiveThread.start();
             connectionState = true;
         } catch (Exception e) {
             throw new TelloNetworkException("Could not connect to drone", e);
@@ -82,26 +89,26 @@ public class TelloCommandConnection {
 
     public TelloResponse sendCommand(TelloCommand cmd) throws TelloNetworkException, TelloCommandTimedOutException, TelloGeneralCommandException, TelloNoValidIMUException, TelloCustomCommandException {
         send(cmd.serializeCommand());
-        if (cmd instanceof PingCommand)
-            return null;
+        return receiveResponse(cmd);
+    }
+
+    private String getResponse(boolean block) {
+        if (!block)
+            return qString.poll();
+
+        while (true) {
+            try {
+                return qString.take();
+            } catch (InterruptedException ignored) {
+            }
+        }
+    }
+
+    public TelloResponse receiveResponse(TelloCommand cmd) throws TelloNetworkException, TelloCommandTimedOutException, TelloGeneralCommandException, TelloNoValidIMUException, TelloCustomCommandException {
         //Read response, or assume ok with the remote control command
-        String data = cmd instanceof RemoteControlCommand ? "ok" : readString().trim();
-        boolean invalid;
-        do {
-            invalid = data.startsWith("conn_ack");
-            if (!TelloSDKValues.COMMAND_REPLY_PATTERN.matcher(data).matches()) invalid = true;
-            if (invalid && TelloSDKValues.DEBUG) {
-                System.err.println("Dropping reply \"" + data + "\" as it might be binary");
-            }
-            if (invalid) {
-                data = readString().trim();
-            }
-        } while (invalid);
+        String data = cmd instanceof RemoteControlCommand ? "ok" : getResponse(true);
         TelloResponse response = cmd.buildResponse(data);
         cmd.setResponse(response);
-        if (response == null) {
-            throw new TelloNetworkException("\"" + cmd.serializeCommand() + "\" command was not answered!");
-        }
         return cmd.getResponse();
     }
 
@@ -162,5 +169,120 @@ public class TelloCommandConnection {
 
     public WifiDrone getDrone() {
         return drone;
+    }
+
+    private class ReceiveThread extends Thread {
+        private final AtomicBoolean stop;
+
+        private ReceiveThread() {
+            stop = new AtomicBoolean(false);
+        }
+
+        public void run() {
+            while (!stop.get()) {
+                try {
+                    var data = readString().trim();
+                    if (data.startsWith("conn_ack"))
+                        continue;
+                    if (!TelloSDKValues.COMMAND_REPLY_PATTERN.matcher(data).matches())
+                        continue;
+                    qString.offer(data);
+                    continue;
+                } catch (TelloNetworkException e) {
+                    e.printStackTrace();
+                } catch (TelloCommandTimedOutException ignored) {
+                }
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException ignored) {
+                }
+            }
+        }
+    }
+
+    private class ExecuteThread extends Thread {
+        private final TelloCommand f;
+        private final Predicate<TelloDroneState> p;
+
+        private ExecuteThread(TelloCommand f, Predicate<TelloDroneState> p) {
+            this.f = f;
+            this.p = p;
+        }
+
+        private boolean checkForFinish() {
+            String data = f instanceof RemoteControlCommand ? "ok" : getResponse(false);
+            if (data == null)
+                return false;
+            try {
+                TelloResponse response = f.buildResponse(data);
+                f.setResponse(response);
+                return true;
+            } catch (TelloNetworkException e) {
+                throw new RuntimeException("Network error", e);
+            } catch (TelloCustomCommandException e) {
+                throw new RuntimeException("Custom error", e);
+            } catch (TelloGeneralCommandException e) {
+                throw new RuntimeException("General error", e);
+            } catch (TelloNoValidIMUException e) {
+                throw new RuntimeException("IMU error", e);
+            }
+        }
+
+        public void run() {
+            try {
+                w:
+                for (var j = 0; ; j++) {
+                    if (j > 0)
+                        System.err.printf("Warning: re-issue command %s, the %d-th times\n", f.getClass().toString(), j);
+                    try {
+                        qString.clear();
+                        send(f.serializeCommand());
+                    } catch (TelloNetworkException e) {
+                        throw new RuntimeException("Network error", e);
+                    }
+                    for (var i = 0; i < 30; i++) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException ignored) {
+                        }
+                        if (checkForFinish())
+                            return;
+                        if (p.test(drone.getCachedState())) {
+                            System.err.println("valid"); // FIXME
+                            break w;
+                        }
+                    }
+                }
+
+                // Wait 3 seconds, then check stability
+                for (var i = 0; ; i++) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ignored) {
+                    }
+                    if (checkForFinish())
+                        return;
+                    if (i < 30)
+                        continue;
+                    if (!drone.getCachedState().isStable())
+                        continue;
+
+                    System.err.println("Warning: no reply found, assume finished");
+                    return;
+                }
+            } finally {
+                if (TelloSDKValues.DEBUG)
+                    System.err.println("passed");
+            }
+        }
+    }
+
+    public TelloResponse robustSendCommand(TelloCommand cmd, Predicate<TelloDroneState> p) {
+        var th = new ExecuteThread(cmd, p);
+        th.start();
+        try {
+            th.join();
+        } catch (InterruptedException ignored) {
+        }
     }
 }

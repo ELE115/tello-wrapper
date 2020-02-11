@@ -16,7 +16,8 @@ import java.util.List;
 
 public class TelloAdapter implements ITelloDrone {
     private final TelloDrone drone;
-    private final TelloD telloD;
+    private final TelloPingD ping;
+    private final TelloHA telloHA;
 
     public TelloAdapter() {
         drone = new WifiDroneFactory().build();
@@ -31,7 +32,8 @@ public class TelloAdapter implements ITelloDrone {
         } catch (TelloGeneralCommandException e) {
             throw new RuntimeException("General error", e);
         }
-        telloD = new TelloD(drone);
+        ping = new TelloPingD(drone);
+        telloHA = new TelloHA(drone);
     }
 
     public TelloAdapter(String ip) {
@@ -47,7 +49,8 @@ public class TelloAdapter implements ITelloDrone {
         } catch (TelloGeneralCommandException e) {
             throw new RuntimeException("General error", e);
         }
-        telloD = new TelloD(drone);
+        ping = new TelloPingD(drone);
+        telloHA = new TelloHA(drone);
     }
 
     @Override
@@ -57,12 +60,8 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void takeoff() {
-        // FIXME
-        drone.addStateListener((oldState, newState) -> {
-            System.err.printf("height=%d yaw=%d vgx=%d vgy=%d vgz=%d ax=%f ay=%f az=%f\n", newState.getHeight(), newState.getYaw(), newState.getSpeedX(), newState.getSpeedY(), newState.getSpeedZ(), newState.getAccelerationX(), newState.getAccelerationY(), newState.getAccelerationZ());
-        });
-        telloD.preventLanding();
-        telloD.execute(() -> {
+        ping.preventLanding();
+        telloHA.execute(() -> {
             try {
                 drone.takeoff();
                 return true;
@@ -80,8 +79,8 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void land() {
-        telloD.stopPreventingLanding();
-        telloD.execute(() -> {
+        ping.stopPreventingLanding();
+        telloHA.execute(() -> {
             try {
                 drone.land();
                 return true;
@@ -119,7 +118,7 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void emergency() {
-        telloD.execute(() -> {
+        telloHA.execute(() -> {
             try {
                 drone.emergency();
                 return true;
@@ -137,7 +136,7 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void moveDirection(MovementDirection direction, int cm) {
-        telloD.execute(() -> {
+        telloHA.execute(() -> {
             try {
                 drone.moveDirection(direction, cm);
                 return true;
@@ -157,7 +156,7 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void turn(TurnDirection direction, int degrees) {
-        telloD.execute(() -> {
+        telloHA.execute(() -> {
             try {
                 drone.turn(direction, degrees);
                 return true;
@@ -177,7 +176,7 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void flip(FlipDirection direction) {
-        telloD.execute(() -> {
+        telloHA.execute(() -> {
             try {
                 drone.flip(direction);
                 return true;
@@ -197,7 +196,7 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void move(int x, int y, int z, int speed) {
-        telloD.execute(() -> {
+        telloHA.execute(() -> {
             try {
                 drone.move(x, y, z, speed);
                 return true;
@@ -217,7 +216,7 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void curve(int x1, int y1, int z1, int x2, int y2, int z2, int speed) {
-        telloD.execute(() -> {
+        telloHA.execute(() -> {
             try {
                 drone.curve(x1, y1, z1, x2, y2, z2, speed);
                 return true;
@@ -252,7 +251,7 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void sendRemoteControlInputs(int lr, int fb, int ud, int yaw) {
-        telloD.execute(() -> {
+        telloHA.execute(() -> {
             try {
                 drone.sendRemoteControlInputs(lr, fb, ud, yaw);
                 return true;
@@ -435,7 +434,7 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void up(int cm) {
-        telloD.execute(() -> {
+        telloHA.execute(() -> {
             try {
                 drone.up(cm);
                 return true;
@@ -455,7 +454,7 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void down(int cm) {
-        telloD.execute(() -> {
+        telloHA.execute(() -> {
             try {
                 drone.down(cm);
                 return true;
@@ -475,7 +474,7 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void left(int cm) {
-        telloD.execute(() -> {
+        telloHA.execute(() -> {
             try {
                 drone.left(cm);
                 return true;
@@ -495,7 +494,7 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void right(int cm) {
-        telloD.execute(() -> {
+        telloHA.execute(() -> {
             try {
                 drone.right(cm);
                 return true;
@@ -515,7 +514,7 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void forward(int cm) {
-        telloD.execute(() -> {
+        telloHA.execute(() -> {
             try {
                 drone.forward(cm);
                 return true;
@@ -535,7 +534,7 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void backward(int cm) {
-        telloD.execute(() -> {
+        telloHA.execute(() -> {
             try {
                 drone.backward(cm);
                 return true;
@@ -555,7 +554,7 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void turnLeft(int degrees) {
-        telloD.execute(() -> {
+        telloHA.execute(() -> {
             try {
                 drone.turnLeft(degrees);
                 return true;
@@ -575,7 +574,7 @@ public class TelloAdapter implements ITelloDrone {
 
     @Override
     public void turnRight(int degrees) {
-        telloD.execute(() -> {
+        telloHA.execute(() -> {
             try {
                 drone.turnRight(degrees);
                 return true;

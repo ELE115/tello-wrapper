@@ -28,7 +28,7 @@ public class TelloStateDeserializer {
      * @return a new TelloDroneState
      * @throws TelloException when the format is invalid
      */
-    public static TelloDroneState deserialize(String state) throws TelloNetworkException {
+    public static TelloDroneState deserialize(String state, TelloDroneState oldState) throws TelloNetworkException {
         try {
             int pitch = 0, roll = 0, yaw = 0, speedX = 0, speedY = 0, speedZ = 0, tempLow = 0, tempHigh = 0, tofDistance = 0, height = 0, battery = 0, motorTime = 0;
             double barometer = 0, accelerationX = 0, accelerationY = 0, accelerationZ = 0;
@@ -97,7 +97,8 @@ public class TelloStateDeserializer {
                     }
                 }
             }
-            return new TelloDroneState(pitch, roll, yaw, speedX, speedY, speedZ, tempLow, tempHigh, tofDistance, height, battery, motorTime, barometer, accelerationX, accelerationY, accelerationZ);
+            var rotZ = oldState == null ? yaw : yaw - oldState.getYaw();
+            return new TelloDroneState(pitch, roll, yaw, speedX, speedY, speedZ, rotZ, tempLow, tempHigh, tofDistance, height, battery, motorTime, barometer, accelerationX, accelerationY, accelerationZ);
         } catch (Exception e) {
             throw new TelloNetworkException("Error while parsing state input \"" + state + "\"");
         }
