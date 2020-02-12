@@ -16,10 +16,16 @@
 
 package com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.control;
 
+import com.github.ele115.tello_wrapper.tello4j.api.state.TelloDroneState;
 import com.github.ele115.tello_wrapper.tello4j.wifi.model.command.ControlCommand;
 
 public class LandCommand extends ControlCommand {
     public LandCommand() {
         super("land");
+    }
+
+    @Override
+    public boolean test(TelloDroneState oldState, TelloDroneState newState) {
+        return newState.getSpeedZ() < 0;
     }
 }

@@ -29,7 +29,6 @@ import com.github.ele115.tello_wrapper.tello4j.wifi.impl.network.TelloCommandCon
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.response.TelloReadCommandResponse;
 import com.github.ele115.tello_wrapper.tello4j.wifi.model.TelloSDKValues;
 import com.github.ele115.tello_wrapper.tello4j.wifi.model.command.ReadCommand;
-import com.github.ele115.tello_wrapper.tello4j.wifi.model.response.TelloResponse;
 
 public class WifiDrone extends TelloDrone {
     private TelloCommandConnection commandConnection;

@@ -16,6 +16,7 @@
 
 package com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.control;
 
+import com.github.ele115.tello_wrapper.tello4j.api.state.TelloDroneState;
 import com.github.ele115.tello_wrapper.tello4j.api.world.TurnDirection;
 import com.github.ele115.tello_wrapper.tello4j.util.TelloArgumentVerifier;
 import com.github.ele115.tello_wrapper.tello4j.wifi.model.command.ControlCommand;
@@ -29,5 +30,10 @@ public class TurnCommand extends ControlCommand {
         TelloArgumentVerifier.checkRange(amount, 1, 3600, "The amount of %x degrees exceeded the allowed range of [%min,%max]");
         this.direction = direction;
         this.amount = amount;
+    }
+
+    @Override
+    public boolean test(TelloDroneState oldState, TelloDroneState newState) {
+        return Math.abs(newState.getYaw() - oldState.getYaw()) > Math.abs(amount) / 2;
     }
 }

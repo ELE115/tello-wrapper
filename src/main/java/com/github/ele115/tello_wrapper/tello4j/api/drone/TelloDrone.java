@@ -17,11 +17,9 @@
 package com.github.ele115.tello_wrapper.tello4j.api.drone;
 
 import com.github.ele115.tello_wrapper.ITelloDrone;
-import com.github.ele115.tello_wrapper.tello4j.api.exception.*;
 import com.github.ele115.tello_wrapper.tello4j.api.state.StateListener;
 import com.github.ele115.tello_wrapper.tello4j.api.state.TelloDroneState;
 import com.github.ele115.tello_wrapper.tello4j.api.video.TelloVideoExportType;
-import com.github.ele115.tello_wrapper.tello4j.api.video.TelloVideoFrame;
 import com.github.ele115.tello_wrapper.tello4j.api.video.VideoListener;
 import com.github.ele115.tello_wrapper.tello4j.api.world.FlipDirection;
 import com.github.ele115.tello_wrapper.tello4j.api.world.MovementDirection;
