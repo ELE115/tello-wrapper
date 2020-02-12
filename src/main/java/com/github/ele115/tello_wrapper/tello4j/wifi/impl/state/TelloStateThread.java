@@ -68,7 +68,7 @@ public class TelloStateThread extends Thread {
     }
 
     private void handleInput(String s) throws TelloException {
-        if (TelloSDKValues.DEBUG) System.out.println("[STE] " + s.trim());
+        if (TelloSDKValues.DEBUG) System.err.println("[STE] " + s.trim());
         TelloDroneState old = this.connection.getDrone().getCachedState();
         TelloDroneState state = TelloStateDeserializer.deserialize(s, old);
         this.connection.getDrone().setCachedState(state);

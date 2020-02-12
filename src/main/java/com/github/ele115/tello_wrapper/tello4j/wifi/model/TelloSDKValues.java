@@ -34,7 +34,8 @@ public class TelloSDKValues {
 
     public static final int STREAM_DEFAULT_PACKET_SIZE = 1460;
 
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = "true".equals(System.getenv("TELLO_DEBUG"));
+    public static final boolean INFO = "true".equals(System.getenv("TELLO_INFO"));
 
     public static final int VIDEO_WIDTH = 960;
     public static final int VIDEO_HEIGHT = 720;

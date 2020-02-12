@@ -35,6 +35,7 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
@@ -46,7 +47,7 @@ public class TelloCommandConnection {
     TelloVideoThread videoThread;
     PingThread pingThread;
     ReceiveThread receiveThread;
-    BlockingQueue<String> qString;
+    BlockingQueue<String> qString = new LinkedBlockingQueue<>();
 
     TelloDrone drone;
 
@@ -75,6 +76,7 @@ public class TelloCommandConnection {
             videoThread.connect();
             stateThread.start();
             videoThread.start();
+            pingThread.start();
             receiveThread.start();
             connectionState = true;
         } catch (Exception e) {
@@ -107,7 +109,7 @@ public class TelloCommandConnection {
     private void send(String str) throws TelloNetworkException {
         if (!connectionState)
             throw new RuntimeException("Can not send/receive data when the connection is closed!");
-        if (TelloSDKValues.DEBUG) System.out.println("[OUT] " + str);
+        if (TelloSDKValues.DEBUG) System.err.println("[OUT] " + str);
 
         this.send(str.getBytes(StandardCharsets.UTF_8));
     }
@@ -143,7 +145,7 @@ public class TelloCommandConnection {
             throw new TelloNetworkException("Can not send/receive data when the connection is closed!");
         byte[] data = readBytes();
         String str = new String(data, StandardCharsets.UTF_8);
-        if (TelloSDKValues.DEBUG) System.out.println("[IN ] " + str.trim());
+        if (TelloSDKValues.DEBUG) System.err.println("[IN ] " + str.trim());
         return str;
     }
 
@@ -159,14 +161,11 @@ public class TelloCommandConnection {
         public AtomicBoolean stop = new AtomicBoolean(false);
 
         public void run() {
-            while (stop.get()) {
-                try {
-                    send("-- ping --");
-                } catch (TelloNetworkException ignored) {
-                }
+            while (!stop.get()) {
                 try {
                     Thread.sleep(2000);
-                } catch (InterruptedException ignored) {
+                    send("-- ping --");
+                } catch (Exception ignored) {
                 }
             }
         }
@@ -191,6 +190,8 @@ public class TelloCommandConnection {
                         continue;
                     if (!TelloSDKValues.COMMAND_REPLY_PATTERN.matcher(data).matches())
                         continue;
+                    if (TelloSDKValues.INFO)
+                        System.err.println("Received: " + data);
                     qString.offer(data);
                     continue;
                 } catch (TelloNetworkException e) {
@@ -222,6 +223,8 @@ public class TelloCommandConnection {
             String data = f instanceof RemoteControlCommand ? "ok" : getResponse(false);
             if (data == null)
                 return false;
+            if (TelloSDKValues.INFO)
+                System.err.println("Building response: " + data);
             try {
                 TelloResponse response = f.buildResponse(data);
                 f.setResponse(response);
@@ -241,9 +244,11 @@ public class TelloCommandConnection {
             try {
                 w:
                 for (var j = 0; ; j++) {
-                    if (j > 0)
-                        System.err.printf("Warning: re-issue command %s, the %d-th times\n", f.getClass().toString(), j);
+                    if (j > 0 && TelloSDKValues.INFO)
+                        System.err.printf("Warning: re-issue command %s, the %d-th times\n", f.serializeCommand(), j);
                     try {
+                        if (TelloSDKValues.INFO)
+                            System.err.println("Info: flushing queue");
                         qString.clear();
                         send(f.serializeCommand());
                     } catch (TelloNetworkException e) {
@@ -257,7 +262,8 @@ public class TelloCommandConnection {
                         if (checkForFinish())
                             return;
                         if (p.test(drone.getCachedState())) {
-                            System.err.println("valid"); // FIXME
+                            if (TelloSDKValues.INFO)
+                                System.err.println("Info: (inferred) drone received " + f.serializeCommand());
                             break w;
                         }
                     }
@@ -276,12 +282,13 @@ public class TelloCommandConnection {
                     if (!drone.getCachedState().isStable())
                         continue;
 
-                    System.err.println("Warning: no reply found, assume finished");
+                    if (TelloSDKValues.INFO)
+                        System.err.println("Warning: (inferred) drone is stabilized");
                     return;
                 }
             } finally {
-                if (TelloSDKValues.DEBUG)
-                    System.err.println("passed");
+                if (TelloSDKValues.INFO)
+                    System.err.println("Info: finished " + f.serializeCommand());
             }
         }
     }
