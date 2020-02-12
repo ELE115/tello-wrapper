@@ -56,9 +56,9 @@ public class TelloCommandConnection {
         this.drone = drone;
     }
 
-    public void connect(String remote) throws TelloNetworkException {
+    public void connect(String remote) {
         if (onceConnected)
-            throw new TelloNetworkException("You can not reconnect by using connect(). Please build a new tello drone object.");
+            throw new RuntimeException("You can not reconnect by using connect(). Please build a new tello drone object.");
         try {
             onceConnected = true;
             lastCommand = System.currentTimeMillis();
@@ -77,7 +77,7 @@ public class TelloCommandConnection {
             receiveThread.start();
             connectionState = true;
         } catch (Exception e) {
-            throw new TelloNetworkException("Could not connect to drone", e);
+            throw new RuntimeException("Could not connect to drone", e);
         }
     }
 
@@ -89,11 +89,6 @@ public class TelloCommandConnection {
         receiveThread.kill();
         ds.disconnect();
         ds.close();
-    }
-
-    public TelloResponse sendCommand(TelloCommand cmd) throws TelloNetworkException, TelloCommandTimedOutException, TelloGeneralCommandException, TelloNoValidIMUException, TelloCustomCommandException {
-        send(cmd.serializeCommand());
-        return receiveResponse(cmd);
     }
 
     private String getResponse(boolean block) {
@@ -108,23 +103,15 @@ public class TelloCommandConnection {
         }
     }
 
-    public TelloResponse receiveResponse(TelloCommand cmd) throws TelloNetworkException, TelloCommandTimedOutException, TelloGeneralCommandException, TelloNoValidIMUException, TelloCustomCommandException {
-        //Read response, or assume ok with the remote control command
-        String data = cmd instanceof RemoteControlCommand ? "ok" : getResponse(true);
-        TelloResponse response = cmd.buildResponse(data);
-        cmd.setResponse(response);
-        return cmd.getResponse();
-    }
-
-    void send(String str) throws TelloNetworkException {
+    private void send(String str) throws TelloNetworkException {
         if (!connectionState)
-            throw new TelloNetworkException("Can not send/receive data when the connection is closed!");
+            throw new RuntimeException("Can not send/receive data when the connection is closed!");
         if (TelloSDKValues.DEBUG) System.out.println("[OUT] " + str);
 
         try {
             this.send(str.getBytes("UTF-8"));
         } catch (UnsupportedEncodingException e) {
-            throw new TelloNetworkException("Your system does not support utf-8 encoding", e);
+            throw new RuntimeException("Your system does not support utf-8 encoding", e);
         }
     }
 
@@ -306,7 +293,7 @@ public class TelloCommandConnection {
         }
     }
 
-    public TelloResponse robustSendCommand(TelloCommand cmd) {
+    public TelloResponse sendCommand(TelloCommand cmd) {
         var o = drone.getCachedState();
         var th = new ExecuteThread(cmd, (s) -> cmd.test(o, s));
         th.start();

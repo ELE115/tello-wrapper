@@ -29,7 +29,7 @@ public class WifiDroneFactory {
      *
      * @return new {@link TelloDrone}
      */
-    public TelloDrone build() {
+    public static TelloDrone build() {
         return new WifiDrone();
     }
 }

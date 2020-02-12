@@ -1,6 +1,6 @@
 package com.github.ele115.tello_wrapper;
 
-import com.github.ele115.tello_wrapper.ha.TelloAdapter;
+import com.github.ele115.tello_wrapper.tello4j.api.drone.WifiDroneFactory;
 
 public final class Tello {
     private Tello() {
@@ -22,8 +22,11 @@ public final class Tello {
             throw new RuntimeException("Please specify your Drone ID");
         if (droneId.equals("simulator"))
             return new TelloSimulator(false);
-        if (droneId.equals("default"))
-            return new TelloAdapter();
+        if (droneId.equals("default")) {
+            var drone = WifiDroneFactory.build();
+            drone.connect();
+            return drone;
+        }
         if (!droneId.matches("[0-9A-F]{6}"))
             throw new RuntimeException("Drone ID incorrect, please double check");
         var id = droneId.toLowerCase();
@@ -33,7 +36,12 @@ public final class Tello {
             throw new RuntimeException("Drone with ID " + mac + " not found, please double check");
         if (res.size() > 1)
             throw new RuntimeException("More than one drones with ID " + mac + " found");
-        var ip = res.get(0);
-        return new TelloAdapter(ip);
+
+        {
+            var ip = res.get(0);
+            var drone = WifiDroneFactory.build();
+            drone.connect(ip);
+            return drone;
+        }
     }
 }

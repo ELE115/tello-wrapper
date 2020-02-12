@@ -17,7 +17,6 @@
 package com.github.ele115.tello_wrapper.tello4j.wifi.impl;
 
 import com.github.ele115.tello_wrapper.tello4j.api.drone.TelloDrone;
-import com.github.ele115.tello_wrapper.tello4j.api.exception.*;
 import com.github.ele115.tello_wrapper.tello4j.api.world.FlipDirection;
 import com.github.ele115.tello_wrapper.tello4j.api.world.MovementDirection;
 import com.github.ele115.tello_wrapper.tello4j.api.world.TurnDirection;
@@ -42,20 +41,15 @@ public class WifiDrone extends TelloDrone {
     }
 
     @Override
-    public void connect() throws TelloNetworkException, TelloCommandTimedOutException, TelloCustomCommandException, TelloGeneralCommandException {
+    public void connect() {
         this.connect(TelloSDKValues.DRONE_IP_DST);
     }
 
     @Override
-    public void connect(String remoteAddr) throws TelloNetworkException, TelloCommandTimedOutException, TelloCustomCommandException, TelloGeneralCommandException {
+    public void connect(String remoteAddr) {
         this.commandConnection.connect(remoteAddr);
         //Enter SDK mode
-        try {
-            this.commandConnection.sendCommand(new EnterSDKModeCommand());
-        } catch (TelloNoValidIMUException e) {
-            //Will (hopefully) never happen
-            e.printStackTrace();
-        }
+        this.commandConnection.sendCommand(new EnterSDKModeCommand());
     }
 
     @Override
@@ -68,136 +62,95 @@ public class WifiDrone extends TelloDrone {
         return this.commandConnection.isConnected();
     }
 
-    public void takeoff() throws TelloCommandTimedOutException, TelloCustomCommandException, TelloNetworkException, TelloGeneralCommandException {
-        try {
-            this.commandConnection.sendCommand(new TakeoffCommand());
-        } catch (TelloNoValidIMUException e) {
-            //Will (hopefully) never happen
-            e.printStackTrace();
-        }
+    public void takeoff() {
+        this.commandConnection.sendCommand(new TakeoffCommand());
     }
 
-    public void land() throws TelloCommandTimedOutException, TelloCustomCommandException, TelloNetworkException, TelloGeneralCommandException {
-        try {
-            this.commandConnection.sendCommand(new LandCommand());
-        } catch (TelloNoValidIMUException e) {
-            //Will (hopefully) never happen
-            e.printStackTrace();
-        }
+    public void land() {
+        this.commandConnection.sendCommand(new LandCommand());
     }
 
     public boolean isStreaming() {
         return this.streaming;
     }
 
-    public void setStreaming(boolean stream) throws TelloCommandTimedOutException, TelloCustomCommandException, TelloNetworkException, TelloGeneralCommandException {
+    public void setStreaming(boolean stream) {
         //Only notify drone on state change
-        try {
-            if (stream && !streaming) {
-                this.commandConnection.sendCommand(new StreamOnCommand());
-            } else if (!stream && streaming) {
-                this.commandConnection.sendCommand(new StreamOffCommand());
-            }
-        } catch (TelloNoValidIMUException e) {
-            //Will (hopefully) never happen
-            e.printStackTrace();
+        if (stream && !streaming) {
+            this.commandConnection.sendCommand(new StreamOnCommand());
+        } else if (!stream && streaming) {
+            this.commandConnection.sendCommand(new StreamOffCommand());
         }
         //If state change successful, update streaming parameter
         this.streaming = stream;
     }
 
-    public void emergency() throws TelloCommandTimedOutException, TelloCustomCommandException, TelloNetworkException, TelloGeneralCommandException {
-        try {
-            this.commandConnection.sendCommand(new EmergencyCommand());
-        } catch (TelloNoValidIMUException e) {
-            //Will (hopefully) never happen
-            e.printStackTrace();
-        }
+    public void emergency() {
+        this.commandConnection.sendCommand(new EmergencyCommand());
     }
 
-    public void moveDirection(MovementDirection direction, int cm) throws TelloCommandTimedOutException, TelloCustomCommandException, TelloNetworkException, TelloNoValidIMUException, TelloGeneralCommandException {
+    public void moveDirection(MovementDirection direction, int cm) {
         this.commandConnection.sendCommand(new FlyDirectionCommand(direction, cm));
     }
 
-    public void turn(TurnDirection direction, int degrees) throws TelloCommandTimedOutException, TelloCustomCommandException, TelloNetworkException, TelloNoValidIMUException, TelloGeneralCommandException {
+    public void turn(TurnDirection direction, int degrees) {
         this.commandConnection.sendCommand(new TurnCommand(direction, degrees));
     }
 
-    public void flip(FlipDirection direction) throws TelloCommandTimedOutException, TelloCustomCommandException, TelloNetworkException, TelloNoValidIMUException, TelloGeneralCommandException {
+    public void flip(FlipDirection direction) {
         this.commandConnection.sendCommand(new FlipCommand(direction));
     }
 
-    public void move(int x, int y, int z, int speed) throws TelloCommandTimedOutException, TelloCustomCommandException, TelloNetworkException, TelloNoValidIMUException, TelloGeneralCommandException {
+    public void move(int x, int y, int z, int speed) {
         this.commandConnection.sendCommand(new FlyParameterizedCommand(x, y, z, speed));
     }
 
-    public void curve(int x1, int y1, int z1, int x2, int y2, int z2, int speed) throws TelloCommandTimedOutException, TelloCustomCommandException, TelloNetworkException, TelloNoValidIMUException, TelloGeneralCommandException {
+    public void curve(int x1, int y1, int z1, int x2, int y2, int z2, int speed) {
         this.commandConnection.sendCommand(new FlyCurveCommand(x1, x2, y1, y2, z1, z2, speed));
     }
 
-    public void setSpeed(int speed) throws TelloCommandTimedOutException, TelloCustomCommandException, TelloNetworkException, TelloGeneralCommandException {
-        try {
-            this.commandConnection.sendCommand(new SetSpeedCommand(speed));
-        } catch (TelloNoValidIMUException e) {
-            //Will (hopefully) never happen
-            e.printStackTrace();
-        }
+    public void setSpeed(int speed) {
+        this.commandConnection.sendCommand(new SetSpeedCommand(speed));
     }
 
-    public void sendRemoteControlInputs(int lr, int fb, int ud, int yaw) throws TelloCommandTimedOutException, TelloCustomCommandException, TelloNetworkException, TelloGeneralCommandException {
-        try {
-            this.commandConnection.sendCommand(new RemoteControlCommand(lr, fb, ud, yaw));
-        } catch (TelloNoValidIMUException e) {
-            //Will (hopefully) never happen
-            e.printStackTrace();
-        }
+    public void sendRemoteControlInputs(int lr, int fb, int ud, int yaw) {
+        this.commandConnection.sendCommand(new RemoteControlCommand(lr, fb, ud, yaw));
     }
 
-    public void setWifiSSIDAndPassword(String ssid, String password) throws TelloCommandTimedOutException, TelloCustomCommandException, TelloNetworkException, TelloGeneralCommandException {
-        try {
-            this.commandConnection.sendCommand(new SetWifiPasswordAndSSIDCommand(ssid, password));
-        } catch (TelloNoValidIMUException e) {
-            //Will (hopefully) never happen
-            e.printStackTrace();
-        }
+    public void setWifiSSIDAndPassword(String ssid, String password) {
+        this.commandConnection.sendCommand(new SetWifiPasswordAndSSIDCommand(ssid, password));
     }
 
-    private Object[] fetch(ReadCommand cmd) throws TelloNetworkException, TelloCommandTimedOutException, TelloCustomCommandException, TelloGeneralCommandException {
-        TelloResponse r = null;
-        try {
-            r = this.commandConnection.sendCommand(cmd);
-        } catch (TelloNoValidIMUException e) {
-            //Will (hopefully) never happen
-            e.printStackTrace();
-        }
+    private Object[] fetch(ReadCommand cmd) {
+        var r = this.commandConnection.sendCommand(cmd);
         if (r instanceof TelloReadCommandResponse) {
             return ((TelloReadCommandResponse) r).getReturnValues();
         } else {
-            throw new TelloNetworkException("Error while parsing input");
+            throw new RuntimeException("Error while parsing input");
         }
     }
 
-    public double fetchSpeed() throws TelloCommandTimedOutException, TelloNetworkException, TelloCustomCommandException, TelloGeneralCommandException {
+    public double fetchSpeed() {
         return (double) fetch(new ReadSpeedCommand())[0];
     }
 
-    public int fetchBattery() throws TelloCommandTimedOutException, TelloNetworkException, TelloCustomCommandException, TelloGeneralCommandException {
+    public int fetchBattery() {
         return (int) fetch(new ReadBatteryCommand())[0];
     }
 
-    public int fetchMotorTime() throws TelloCommandTimedOutException, TelloNetworkException, TelloCustomCommandException, TelloGeneralCommandException {
+    public int fetchMotorTime() {
         return (int) fetch(new ReadMotorTimeCommand())[0];
     }
 
-    public int fetchHeight() throws TelloCommandTimedOutException, TelloNetworkException, TelloCustomCommandException, TelloGeneralCommandException {
+    public int fetchHeight() {
         return (int) fetch(new ReadHeightCommand())[0];
     }
 
-    public int fetchTemperature() throws TelloCommandTimedOutException, TelloNetworkException, TelloCustomCommandException, TelloGeneralCommandException {
+    public int fetchTemperature() {
         return (int) fetch(new ReadTemperatureCommand())[0];
     }
 
-    public int[] fetchAttitude() throws TelloCommandTimedOutException, TelloNetworkException, TelloCustomCommandException, TelloGeneralCommandException {
+    public int[] fetchAttitude() {
         Object[] in = fetch(new ReadAttitudeCommand());
         int[] ret = new int[3];
         for (int i = 0; i < ret.length; i++) {
@@ -206,11 +159,11 @@ public class WifiDrone extends TelloDrone {
         return ret;
     }
 
-    public double fetchBarometer() throws TelloCommandTimedOutException, TelloNetworkException, TelloCustomCommandException, TelloGeneralCommandException {
+    public double fetchBarometer() {
         return (double) fetch(new ReadBarometerCommand())[0];
     }
 
-    public double[] fetchAcceleration() throws TelloCommandTimedOutException, TelloNetworkException, TelloCustomCommandException, TelloGeneralCommandException {
+    public double[] fetchAcceleration() {
         Object[] in = fetch(new ReadAccelerationCommand());
         double[] ret = new double[3];
         for (int i = 0; i < ret.length; i++) {
@@ -219,11 +172,11 @@ public class WifiDrone extends TelloDrone {
         return ret;
     }
 
-    public int fetchTOFDistance() throws TelloCommandTimedOutException, TelloNetworkException, TelloCustomCommandException, TelloGeneralCommandException {
+    public int fetchTOFDistance() {
         return (int) fetch(new ReadTOFDistanceCommand())[0];
     }
 
-    public int fetchWifiSnr() throws TelloCommandTimedOutException, TelloNetworkException, TelloCustomCommandException, TelloGeneralCommandException {
+    public int fetchWifiSnr() {
         return (int) fetch(new ReadWifiSNRCommand())[0];
     }
 }
