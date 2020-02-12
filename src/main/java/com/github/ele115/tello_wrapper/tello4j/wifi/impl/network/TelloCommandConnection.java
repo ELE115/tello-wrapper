@@ -261,7 +261,7 @@ public class TelloCommandConnection {
                         }
                         if (checkForFinish())
                             return;
-                        if (p.test(drone.getCachedState())) {
+                        if (drone.getCachedState() != null && p.test(drone.getCachedState())) {
                             if (TelloSDKValues.INFO)
                                 System.err.println("Info: (inferred) drone received " + f.serializeCommand());
                             break w;
