@@ -27,6 +27,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 public class TelloStateThread extends Thread {
@@ -63,11 +64,7 @@ public class TelloStateThread extends Thread {
     }
 
     private void handleInput(byte[] bytes) throws TelloException {
-        try {
-            this.handleInput(new String(bytes, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            throw new TelloNetworkException("Your system does not support utf-8", e);
-        }
+        this.handleInput(new String(bytes, StandardCharsets.UTF_8));
     }
 
     private void handleInput(String s) throws TelloException {

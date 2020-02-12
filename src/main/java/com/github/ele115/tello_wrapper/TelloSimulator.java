@@ -54,8 +54,8 @@ class TelloSimulator implements ITelloDrone {
 
         if (traceable) {
             try {
-                var s = Double.toString(x) + "," + Double.toString(y) + "," +
-                        Double.toString(yaw) + "," + Double.toString(height) + "\n";
+                var s = x + "," + y + "," +
+                        yaw + "," + Double.toString(height) + "\n";
                 Files.write(Paths.get("./tello-simulator.trace"), s.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             } catch (IOException e) {
                 throw new RuntimeException("Cannot append to trace file");

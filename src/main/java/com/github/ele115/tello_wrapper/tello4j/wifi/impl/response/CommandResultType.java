@@ -18,5 +18,5 @@ package com.github.ele115.tello_wrapper.tello4j.wifi.impl.response;
 
 public enum CommandResultType {
     OK,
-    ERROR;
+    ERROR
 }

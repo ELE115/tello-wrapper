@@ -34,5 +34,5 @@ public enum TelloVideoExportType {
     /**
      * Provide {@link org.bytedeco.javacv.Frame}s and {@link java.awt.image.BufferedImage}s.
      */
-    BOTH;
+    BOTH
 }

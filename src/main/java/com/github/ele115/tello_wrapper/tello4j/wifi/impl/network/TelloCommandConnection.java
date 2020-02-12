@@ -32,6 +32,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -108,11 +109,7 @@ public class TelloCommandConnection {
             throw new RuntimeException("Can not send/receive data when the connection is closed!");
         if (TelloSDKValues.DEBUG) System.out.println("[OUT] " + str);
 
-        try {
-            this.send(str.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("Your system does not support utf-8 encoding", e);
-        }
+        this.send(str.getBytes(StandardCharsets.UTF_8));
     }
 
     private void send(byte[] bytes) throws TelloNetworkException {
@@ -145,13 +142,9 @@ public class TelloCommandConnection {
         if (!connectionState)
             throw new TelloNetworkException("Can not send/receive data when the connection is closed!");
         byte[] data = readBytes();
-        try {
-            String str = new String(data, "UTF-8");
-            if (TelloSDKValues.DEBUG) System.out.println("[IN ] " + str.trim());
-            return str;
-        } catch (UnsupportedEncodingException e) {
-            throw new TelloNetworkException("Your system does not support utf-8 encoding", e);
-        }
+        String str = new String(data, StandardCharsets.UTF_8);
+        if (TelloSDKValues.DEBUG) System.out.println("[IN ] " + str.trim());
+        return str;
     }
 
     public boolean isConnected() {
