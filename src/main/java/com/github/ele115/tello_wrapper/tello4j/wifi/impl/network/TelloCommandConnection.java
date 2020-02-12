@@ -16,9 +16,9 @@
 
 package com.github.ele115.tello_wrapper.tello4j.wifi.impl.network;
 
+import com.github.ele115.tello_wrapper.tello4j.api.drone.TelloDrone;
 import com.github.ele115.tello_wrapper.tello4j.api.exception.*;
 import com.github.ele115.tello_wrapper.tello4j.api.state.TelloDroneState;
-import com.github.ele115.tello_wrapper.tello4j.wifi.impl.WifiDrone;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.set.RemoteControlCommand;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.state.TelloStateThread;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.video.TelloVideoThread;
@@ -43,15 +43,16 @@ public class TelloCommandConnection {
     boolean connectionState = false;
     TelloStateThread stateThread;
     TelloVideoThread videoThread;
+    PingThread pingThread;
     ReceiveThread receiveThread;
     BlockingQueue<String> qString;
 
-    WifiDrone drone;
+    TelloDrone drone;
 
     private long lastCommand = -1;
     private boolean onceConnected = false;
 
-    public TelloCommandConnection(WifiDrone drone) {
+    public TelloCommandConnection(TelloDrone drone) {
         this.drone = drone;
     }
 
@@ -63,6 +64,7 @@ public class TelloCommandConnection {
             lastCommand = System.currentTimeMillis();
             stateThread = new TelloStateThread(this);
             videoThread = new TelloVideoThread(this);
+            pingThread = new PingThread();
             receiveThread = new ReceiveThread();
             this.remoteAddress = InetAddress.getByName(remote);
             ds = new DatagramSocket(TelloSDKValues.COMMAND_PORT);
@@ -83,6 +85,8 @@ public class TelloCommandConnection {
         connectionState = false;
         stateThread.kill();
         videoThread.kill();
+        pingThread.kill();
+        receiveThread.kill();
         ds.disconnect();
         ds.close();
     }
@@ -167,8 +171,29 @@ public class TelloCommandConnection {
         return connectionState && (lastCommand + TelloSDKValues.COMMAND_TIMEOUT) > System.currentTimeMillis();
     }
 
-    public WifiDrone getDrone() {
+    public TelloDrone getDrone() {
         return drone;
+    }
+
+    private class PingThread extends Thread {
+        public AtomicBoolean stop = new AtomicBoolean(false);
+
+        public void run() {
+            while (stop.get()) {
+                try {
+                    send("-- ping --");
+                } catch (TelloNetworkException ignored) {
+                }
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ignored) {
+                }
+            }
+        }
+
+        public void kill() {
+            stop.set(true);
+        }
     }
 
     private class ReceiveThread extends Thread {
@@ -197,6 +222,10 @@ public class TelloCommandConnection {
                 } catch (InterruptedException ignored) {
                 }
             }
+        }
+
+        public void kill() {
+            stop.set(true);
         }
     }
 
@@ -277,12 +306,14 @@ public class TelloCommandConnection {
         }
     }
 
-    public TelloResponse robustSendCommand(TelloCommand cmd, Predicate<TelloDroneState> p) {
-        var th = new ExecuteThread(cmd, p);
+    public TelloResponse robustSendCommand(TelloCommand cmd) {
+        var o = drone.getCachedState();
+        var th = new ExecuteThread(cmd, (s) -> cmd.test(o, s));
         th.start();
         try {
             th.join();
         } catch (InterruptedException ignored) {
         }
+        return cmd.getResponse();
     }
 }

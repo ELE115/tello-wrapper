@@ -16,8 +16,6 @@ import java.util.List;
 
 public class TelloAdapter implements ITelloDrone {
     private final TelloDrone drone;
-    private final TelloPingD ping;
-    private final TelloHA telloHA;
 
     public TelloAdapter() {
         drone = new WifiDroneFactory().build();
@@ -32,8 +30,6 @@ public class TelloAdapter implements ITelloDrone {
         } catch (TelloGeneralCommandException e) {
             throw new RuntimeException("General error", e);
         }
-        ping = new TelloPingD(drone);
-        telloHA = new TelloHA(drone);
     }
 
     public TelloAdapter(String ip) {
@@ -49,8 +45,6 @@ public class TelloAdapter implements ITelloDrone {
         } catch (TelloGeneralCommandException e) {
             throw new RuntimeException("General error", e);
         }
-        ping = new TelloPingD(drone);
-        telloHA = new TelloHA(drone);
     }
 
     @Override
