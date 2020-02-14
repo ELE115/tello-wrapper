@@ -27,7 +27,6 @@ import com.github.ele115.tello_wrapper.tello4j.wifi.model.command.TelloCommand;
 import com.github.ele115.tello_wrapper.tello4j.wifi.model.response.TelloResponse;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -94,10 +93,7 @@ public class TelloCommandConnection {
         ds.close();
     }
 
-    private String getResponse(boolean block) {
-        if (!block)
-            return qString.poll();
-
+    private String getResponse() {
         while (true) {
             try {
                 return qString.take();
@@ -220,7 +216,7 @@ public class TelloCommandConnection {
         }
 
         private boolean checkForFinish() {
-            String data = f instanceof RemoteControlCommand ? "ok" : getResponse(false);
+            String data = f instanceof RemoteControlCommand ? "ok" : getResponse();
             if (data == null)
                 return false;
             if (TelloSDKValues.INFO)
