@@ -184,7 +184,6 @@ public class TelloCommandConnection {
                     var data = readString().trim();
                     if (data.startsWith("conn_ack"))
                         continue;
-                    System.err.println("Received: " + data);
                     if (!TelloSDKValues.COMMAND_REPLY_PATTERN.matcher(data).matches())
                         continue;
                     if (TelloSDKValues.INFO)
@@ -222,11 +221,11 @@ public class TelloCommandConnection {
             String data = f instanceof RemoteControlCommand ? "ok" : getResponse();
             if (data == null)
                 return false;
-            if (TelloSDKValues.INFO)
-                System.err.println("Building response: " + data);
             var realData = this.processData(data);
             if (realData == null)
                 return false;
+            if (TelloSDKValues.INFO)
+                System.err.println("Building response: " + data);
             try {
                 TelloResponse response = f.buildResponse(realData);
                 f.setResponse(response);
@@ -246,6 +245,13 @@ public class TelloCommandConnection {
     private class SimpleExecuteThread extends ExecuteThreadBase {
         private SimpleExecuteThread(TelloCommand f) {
             super(f);
+        }
+
+        @Override
+        protected String processData(String data) {
+            if (data.startsWith("Re"))
+                return null;
+            return data;
         }
 
         public void run() {
@@ -296,9 +302,13 @@ public class TelloCommandConnection {
         }
 
         public void run() {
-            for (var j = 1; ; j++) {
+            var j = 1;
+            while (true) {
                 try {
-                    send("Re" + toReFormat(s) + toReFormat(j) + " " + f.serializeCommand());
+                    send("Re" + toReFormat(s) + toReFormat(j++) + " " + f.serializeCommand());
+                    send("Re" + toReFormat(s) + toReFormat(j++) + " " + f.serializeCommand());
+                    send("Re" + toReFormat(s) + toReFormat(j++) + " " + f.serializeCommand());
+                    send("Re" + toReFormat(s) + toReFormat(j++) + " " + f.serializeCommand());
                 } catch (TelloNetworkException e) {
                     throw new RuntimeException("Network error", e);
                 }
@@ -307,11 +317,8 @@ public class TelloCommandConnection {
                         Thread.sleep(100);
                     } catch (InterruptedException ignored) {
                     }
-                    if (checkForFinish()) {
-                        if (TelloSDKValues.INFO)
-                            System.err.println("Info: finished " + f.serializeCommand());
+                    if (checkForFinish())
                         return;
-                    }
                 }
             }
         }
@@ -328,6 +335,8 @@ public class TelloCommandConnection {
             th.join();
         } catch (InterruptedException ignored) {
         }
+        if (TelloSDKValues.INFO)
+            System.err.println("Info: finished " + cmd.serializeCommand());
         return cmd.getResponse();
     }
 }

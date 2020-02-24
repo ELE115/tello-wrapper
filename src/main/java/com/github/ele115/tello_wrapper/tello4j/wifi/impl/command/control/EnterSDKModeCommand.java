@@ -23,4 +23,8 @@ public class EnterSDKModeCommand extends ControlCommand {
         super("command");
     }
 
+    @Override
+    public boolean isIdempotent() {
+        return true;
+    }
 }
