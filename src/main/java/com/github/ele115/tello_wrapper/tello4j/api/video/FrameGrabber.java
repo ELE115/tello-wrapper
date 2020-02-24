@@ -1,4 +1,4 @@
-package com.github.ele115.alavrov.lab4;
+package com.github.ele115.tello_wrapper.tello4j.api.video;
 
 import com.github.ele115.tello_wrapper.tello4j.api.video.TelloVideoFrame;
 import com.github.ele115.tello_wrapper.tello4j.api.video.VideoListener;
