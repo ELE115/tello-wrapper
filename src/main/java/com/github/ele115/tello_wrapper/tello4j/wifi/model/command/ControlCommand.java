@@ -16,14 +16,13 @@
 
 package com.github.ele115.tello_wrapper.tello4j.wifi.model.command;
 
-import com.github.ele115.tello_wrapper.tello4j.api.state.TelloDroneState;
-
 public abstract class ControlCommand extends TelloResultCommand {
     public ControlCommand(String cmd) {
         super(cmd);
     }
 
-    public boolean test(TelloDroneState oldState, TelloDroneState newState) {
-        return newState.getSpeed() > 0;
+    @Override
+    public boolean isIdempotent() {
+        return false;
     }
 }

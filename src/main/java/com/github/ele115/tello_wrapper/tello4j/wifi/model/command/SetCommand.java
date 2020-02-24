@@ -20,4 +20,9 @@ public abstract class SetCommand extends TelloResultCommand {
     public SetCommand(String cmd) {
         super(cmd);
     }
+
+    @Override
+    public boolean isIdempotent() {
+        return true;
+    }
 }

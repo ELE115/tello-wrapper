@@ -44,7 +44,5 @@ public abstract class TelloCommand {
         this.exception = exception;
     }
 
-    public boolean test(TelloDroneState oldState, TelloDroneState newState) {
-        return false;
-    }
+    public abstract boolean isIdempotent();
 }

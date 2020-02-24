@@ -46,4 +46,9 @@ public abstract class ReadCommand extends TelloCommand {
         }
         return response;
     }
+
+    @Override
+    public boolean isIdempotent() {
+        return true;
+    }
 }
