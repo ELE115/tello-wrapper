@@ -18,7 +18,6 @@ package com.github.ele115.tello_wrapper.tello4j.wifi.impl.network;
 
 import com.github.ele115.tello_wrapper.tello4j.api.drone.TelloDrone;
 import com.github.ele115.tello_wrapper.tello4j.api.exception.*;
-import com.github.ele115.tello_wrapper.tello4j.api.state.TelloDroneState;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.set.RemoteControlCommand;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.state.TelloStateThread;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.video.TelloVideoThread;
@@ -36,7 +35,7 @@ import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Predicate;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class TelloCommandConnection {
     DatagramSocket ds;
@@ -47,6 +46,7 @@ public class TelloCommandConnection {
     PingThread pingThread;
     ReceiveThread receiveThread;
     BlockingQueue<String> qString = new LinkedBlockingQueue<>();
+    AtomicInteger seq = new AtomicInteger(1);
 
     TelloDrone drone;
 
@@ -184,6 +184,7 @@ public class TelloCommandConnection {
                     var data = readString().trim();
                     if (data.startsWith("conn_ack"))
                         continue;
+                    System.err.println("Received: " + data);
                     if (!TelloSDKValues.COMMAND_REPLY_PATTERN.matcher(data).matches())
                         continue;
                     if (TelloSDKValues.INFO)
@@ -206,23 +207,28 @@ public class TelloCommandConnection {
         }
     }
 
-    private class ExecuteThread extends Thread {
-        private final TelloCommand f;
-        private final Predicate<TelloDroneState> p;
+    private abstract class ExecuteThreadBase extends Thread {
+        protected final TelloCommand f;
 
-        private ExecuteThread(TelloCommand f, Predicate<TelloDroneState> p) {
+        private ExecuteThreadBase(TelloCommand f) {
             this.f = f;
-            this.p = p;
         }
 
-        private boolean checkForFinish() {
+        protected String processData(String data) {
+            return data;
+        }
+
+        protected boolean checkForFinish() {
             String data = f instanceof RemoteControlCommand ? "ok" : getResponse();
             if (data == null)
                 return false;
             if (TelloSDKValues.INFO)
                 System.err.println("Building response: " + data);
+            var realData = this.processData(data);
+            if (realData == null)
+                return false;
             try {
-                TelloResponse response = f.buildResponse(data);
+                TelloResponse response = f.buildResponse(realData);
                 f.setResponse(response);
                 return true;
             } catch (TelloNetworkException e) {
@@ -235,63 +241,88 @@ public class TelloCommandConnection {
                 throw new RuntimeException("IMU error", e);
             }
         }
+    }
+
+    private class SimpleExecuteThread extends ExecuteThreadBase {
+        private SimpleExecuteThread(TelloCommand f) {
+            super(f);
+        }
 
         public void run() {
-            try {
-                w:
-                for (var j = 0; ; j++) {
-                    if (j > 0 && TelloSDKValues.INFO)
-                        System.err.printf("Warning: re-issue command %s, the %d-th times\n", f.serializeCommand(), j);
-                    try {
-                        if (TelloSDKValues.INFO)
-                            System.err.println("Info: flushing queue");
-                        qString.clear();
-                        send(f.serializeCommand());
-                    } catch (TelloNetworkException e) {
-                        throw new RuntimeException("Network error", e);
-                    }
-                    for (var i = 0; i < 30; i++) {
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException ignored) {
-                        }
-                        if (checkForFinish())
-                            return;
-                        if (drone.getCachedState() != null && p.test(drone.getCachedState())) {
-                            if (TelloSDKValues.INFO)
-                                System.err.println("Info: (inferred) drone received " + f.serializeCommand());
-                            break w;
-                        }
-                    }
+            while (true) {
+                try {
+                    if (TelloSDKValues.INFO)
+                        System.err.println("Info: flushing queue");
+                    qString.clear();
+                    send(f.serializeCommand());
+                } catch (TelloNetworkException e) {
+                    throw new RuntimeException("Network error", e);
                 }
-
-                // Wait 3 seconds, then check stability
-                for (var i = 0; ; i++) {
+                for (var i = 0; i < 30; i++) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException ignored) {
                     }
                     if (checkForFinish())
                         return;
-                    if (i < 30)
-                        continue;
-                    if (!drone.getCachedState().isStable())
-                        continue;
-
-                    if (TelloSDKValues.INFO)
-                        System.err.println("Warning: (inferred) drone is stabilized");
-                    return;
                 }
-            } finally {
-                if (TelloSDKValues.INFO)
-                    System.err.println("Info: finished " + f.serializeCommand());
+            }
+        }
+    }
+
+    private class ReExecuteThread extends ExecuteThreadBase {
+        private final int s;
+        private final String prefix;
+
+        private ReExecuteThread(TelloCommand f) {
+            super(f);
+            this.s = seq.getAndIncrement();
+            prefix = "Re" + toReString(s);
+        }
+
+        private String toReString(int v) {
+            return "0" + (v % 9 + 1);
+        }
+
+        private String toReFormat(int v) {
+            return "\u0001" + (char) (v % 128 + 1);
+        }
+
+        @Override
+        protected String processData(String data) {
+            if (data.startsWith(prefix))
+                return data.substring(7);
+            return null;
+        }
+
+        public void run() {
+            for (var j = 1; ; j++) {
+                try {
+                    send("Re" + toReFormat(s) + toReFormat(j) + " " + f.serializeCommand());
+                } catch (TelloNetworkException e) {
+                    throw new RuntimeException("Network error", e);
+                }
+                for (var i = 0; i < 3; i++) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ignored) {
+                    }
+                    if (checkForFinish()) {
+                        if (TelloSDKValues.INFO)
+                            System.err.println("Info: finished " + f.serializeCommand());
+                        return;
+                    }
+                }
             }
         }
     }
 
     public TelloResponse sendCommand(TelloCommand cmd) {
-        var o = drone.getCachedState();
-        var th = new ExecuteThread(cmd, (s) -> cmd.test(o, s));
+        ExecuteThreadBase th;
+        if (cmd.isIdempotent())
+            th = new SimpleExecuteThread(cmd);
+        else
+            th = new ReExecuteThread(cmd);
         th.start();
         try {
             th.join();
