@@ -6,6 +6,7 @@ import com.github.ele115.tello_wrapper.tello4j.api.video.VideoWindow;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.awt.Color;
 import java.awt.image.WritableRaster;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -59,6 +60,35 @@ public class FrameGrabber implements VideoListener
     public BufferedImage[] getImages()
     {
         return frameBuffer;
+    }
+
+    // returns a three dimensional array where the first two indices are the the x location and y location
+    // the third is the color chanel R, G, B where R is index zero, G is index 1 and R is index 2
+    // note that the array is int[x][y][colorchannel] where color channel is {0, 1, 2}
+    public int[][][] getImageArray(int frameNumber)
+    {
+        int [][][] theArray = new int[frameBuffer[frameNumber].getWidth()][frameBuffer[frameNumber].getHeight()][3];
+        for(int i=0; i<frameBuffer[frameNumber].getWidth(); i++) {
+            for(int j=0; j<frameBuffer[frameNumber].getHeight(); j++) {
+                Color pixel = new Color(frameBuffer[frameNumber].getRGB(i,j));
+                theArray[i][j][0]=pixel.getRed();
+                theArray[i][j][1]=pixel.getGreen();
+                theArray[i][j][2]=pixel.getBlue();
+            }
+        }
+        return theArray;
+    }
+
+    public void setImageArray(int frameNumber, int[][][] theImage)
+    {
+        BufferedImage tempBufferedImage = new BufferedImage(theImage.length, theImage[0].length, BufferedImage.TYPE_INT_RGB);
+        for(int i=0; i<tempBufferedImage.getWidth(); i++) {
+            for (int j = 0; j < tempBufferedImage.getHeight(); j++) {
+                Color pixel = new Color(theImage[i][j][0], theImage[i][j][1], theImage[i][j][2]);
+                tempBufferedImage.setRGB( i, j,pixel.getRGB());
+            }
+        }
+        frameBuffer[frameNumber] = tempBufferedImage;
     }
 
     public void setImages(BufferedImage[] images)
