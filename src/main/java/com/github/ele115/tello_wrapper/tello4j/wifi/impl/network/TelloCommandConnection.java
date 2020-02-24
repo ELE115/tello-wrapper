@@ -47,6 +47,7 @@ public class TelloCommandConnection {
     ReceiveThread receiveThread;
     BlockingQueue<String> qString = new LinkedBlockingQueue<>();
     AtomicInteger seq = new AtomicInteger(1);
+    AtomicInteger seqr = new AtomicInteger(0);
 
     TelloDrone drone;
 
@@ -255,16 +256,21 @@ public class TelloCommandConnection {
         }
 
         public void run() {
+            var j = 1;
             while (true) {
                 try {
                     if (TelloSDKValues.INFO)
                         System.err.println("Info: flushing queue");
                     qString.clear();
+                    if (j++ > 1) {
+                        if (TelloSDKValues.INFO)
+                            System.err.println("Warning: re-issue command " + f.serializeCommand());
+                    }
                     send(f.serializeCommand());
                 } catch (TelloNetworkException e) {
                     throw new RuntimeException("Network error", e);
                 }
-                for (var i = 0; i < 30; i++) {
+                for (var i = 0; i < 2; i++) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException ignored) {
@@ -283,11 +289,13 @@ public class TelloCommandConnection {
         private ReExecuteThread(TelloCommand f) {
             super(f);
             this.s = seq.getAndIncrement();
-            prefix = "Re" + toReString(s);
+            prefix = "Re" + toReString();
         }
 
-        private String toReString(int v) {
-            return "0" + (v % 9 + 1);
+        private String toReString() {
+            if (seqr.get() == 0)
+                return "0";
+            return "0" + (seqr.getAndIncrement() % 9 + 1);
         }
 
         private String toReFormat(int v) {
@@ -296,8 +304,14 @@ public class TelloCommandConnection {
 
         @Override
         protected String processData(String data) {
-            if (data.startsWith(prefix))
+            if (data.startsWith(prefix)) {
+                var r = Integer.parseInt(data.substring(3, 4));
+                if (seqr.compareAndSet(0, r)) {
+                    if (TelloSDKValues.INFO)
+                        System.err.println("Info: sequence number set to " + r);
+                }
                 return data.substring(7);
+            }
             return null;
         }
 
@@ -305,6 +319,9 @@ public class TelloCommandConnection {
             var j = 1;
             while (true) {
                 try {
+                    if (TelloSDKValues.INFO)
+                        System.err.println("Info: flushing queue");
+                    qString.clear();
                     send("Re" + toReFormat(s) + toReFormat(j++) + " " + f.serializeCommand());
                     send("Re" + toReFormat(s) + toReFormat(j++) + " " + f.serializeCommand());
                     send("Re" + toReFormat(s) + toReFormat(j++) + " " + f.serializeCommand());
@@ -317,6 +334,8 @@ public class TelloCommandConnection {
                         Thread.sleep(100);
                     } catch (InterruptedException ignored) {
                     }
+                    if (TelloSDKValues.INFO)
+                        System.err.println("Info: Checking...");
                     if (checkForFinish())
                         return;
                 }
