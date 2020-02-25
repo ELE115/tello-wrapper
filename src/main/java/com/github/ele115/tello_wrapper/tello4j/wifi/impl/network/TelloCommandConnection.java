@@ -32,8 +32,8 @@ import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -45,7 +45,7 @@ public class TelloCommandConnection {
     TelloVideoThread videoThread;
     PingThread pingThread;
     ReceiveThread receiveThread;
-    BlockingQueue<String> qString = new LinkedBlockingQueue<>();
+    Queue<String> qString = new LinkedList<>();
     AtomicInteger seq = new AtomicInteger(1);
     AtomicInteger seqr = new AtomicInteger(0);
 
@@ -92,15 +92,6 @@ public class TelloCommandConnection {
         receiveThread.kill();
         ds.disconnect();
         ds.close();
-    }
-
-    private String getResponse() {
-        while (true) {
-            try {
-                return qString.take();
-            } catch (InterruptedException ignored) {
-            }
-        }
     }
 
     private void send(String str) throws TelloNetworkException {
@@ -219,7 +210,7 @@ public class TelloCommandConnection {
         }
 
         protected boolean checkForFinish() {
-            String data = f instanceof RemoteControlCommand ? "ok" : getResponse();
+            String data = f instanceof RemoteControlCommand ? "ok" : qString.poll();
             if (data == null)
                 return false;
             var realData = this.processData(data);
@@ -270,7 +261,7 @@ public class TelloCommandConnection {
                 } catch (TelloNetworkException e) {
                     throw new RuntimeException("Network error", e);
                 }
-                for (var i = 0; i < 2; i++) {
+                for (var i = 0; i < 5; i++) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException ignored) {
@@ -320,7 +311,7 @@ public class TelloCommandConnection {
             while (true) {
                 try {
                     if (TelloSDKValues.INFO)
-                        System.err.println("Info: flushing queue");
+                        System.err.println("Info: " + s + "/" + prefix + "/" + j + " " + f.serializeCommand());
                     qString.clear();
                     send("Re" + toReFormat(s) + toReFormat(j++) + " " + f.serializeCommand());
                     send("Re" + toReFormat(s) + toReFormat(j++) + " " + f.serializeCommand());
@@ -329,13 +320,11 @@ public class TelloCommandConnection {
                 } catch (TelloNetworkException e) {
                     throw new RuntimeException("Network error", e);
                 }
-                for (var i = 0; i < 3; i++) {
+                for (var i = 0; i < 20; i++) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException ignored) {
                     }
-                    if (TelloSDKValues.INFO)
-                        System.err.println("Info: Checking...");
                     if (checkForFinish())
                         return;
                 }
