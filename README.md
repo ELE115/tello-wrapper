@@ -9,19 +9,13 @@ Include the library in your project by adding it as a gradle source dependency:
 
 `build.gradle`:
 ```gradle
-dependencies {
-    implementation 'com.github.ele115:tello-wrapper:0.+'
-    implementation 'me.friwi:tello4j:1.+'
-    implementation 'com.github.b1f6c1c4:mac-to-ip:0.+'
+repositories {
+    jcenter()
 }
-```
 
-`settings.gradle`:
-```gradle
-sourceControl {
-    gitRepository('https://github.com/ELE115/tello-wrapper.git') {
-        producesModule('com.github.ele115:tello-wrapper')
-    }
+dependencies {
+    implementation 'com.github.ele115:tello-wrapper:1.+'
+    implementation 'me.friwi:tello4j:1.+'
 }
 ```
 
@@ -76,3 +70,22 @@ Changes from Tello4J:
 * Added wrapper to get away `throws`
 * Added simulator
 * Integrated `mac-to-ip`
+
+## Development
+
+The package is published to [JFrog Bintray/ELE115/maven/tello-wrapper](https://bintray.com/ele115/maven/tello-wrapper).
+To make a new release:
+
+1. Create a new account on [JFrog Bintray](https://bintray.com/signup/oss).
+1. Obtain your [API key](https://bintray.com/profile/edit).
+1. In file `~/.gradle/gradle.properties`, add two lines:
+
+    ```
+    bintray.user=<your-bintray-user-name>
+    bintray.key=<your-bintray-API-key>
+    ```
+
+1. Ask the admin of the [JFrog Bintray/ELE115](https://bintray.com/ele115) to include you as a member.
+1. Double check if the version in `build.gradle` is correct.
+1. Run `./gradlew bintrayUpload`.
+
