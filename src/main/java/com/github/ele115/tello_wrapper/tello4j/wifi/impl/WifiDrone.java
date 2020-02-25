@@ -24,6 +24,7 @@ import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.control.*;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.read.*;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.set.RemoteControlCommand;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.set.SetSpeedCommand;
+import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.set.SetStationModeCommand;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.command.set.SetWifiPasswordAndSSIDCommand;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.network.TelloCommandConnection;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.response.TelloReadCommandResponse;
@@ -118,6 +119,10 @@ public class WifiDrone extends TelloDrone {
 
     public void setWifiSSIDAndPassword(String ssid, String password) {
         this.commandConnection.sendCommand(new SetWifiPasswordAndSSIDCommand(ssid, password));
+    }
+
+    public void setStationMode(String ssid, String password) {
+        this.commandConnection.sendCommand(new SetStationModeCommand(ssid, password));
     }
 
     private Object[] fetch(ReadCommand cmd) {

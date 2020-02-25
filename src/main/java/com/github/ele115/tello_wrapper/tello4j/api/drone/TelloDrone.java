@@ -104,6 +104,8 @@ public abstract class TelloDrone implements ITelloDrone, AutoCloseable {
 
     public abstract void setWifiSSIDAndPassword(String ssid, String password);
 
+    public abstract void setStationMode(String ssid, String password);
+
     public abstract double fetchSpeed();
 
     public abstract int fetchBattery();

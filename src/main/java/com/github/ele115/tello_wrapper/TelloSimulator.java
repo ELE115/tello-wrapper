@@ -214,6 +214,11 @@ class TelloSimulator implements ITelloDrone {
     }
 
     @Override
+    public void setStationMode(String ssid, String password) {
+        throw new RuntimeException("You should not call this method in simulator.");
+    }
+
+    @Override
     public double fetchSpeed() {
         return speed;
     }

@@ -145,6 +145,14 @@ public interface ITelloDrone {
     void setWifiSSIDAndPassword(String ssid, String password);
 
     /**
+     * Connect your tello to another wifi. Can be reset by pressing the tello "on" button for 5 seconds
+     *
+     * @param ssid     Which wifi to connect
+     * @param password The password of that wifi
+     */
+    void setStationMode(String ssid, String password);
+
+    /**
      * Fetch the current speed setting of this drone. Please note that this does not return the actual current speed.
      *
      * @return Speed setting
