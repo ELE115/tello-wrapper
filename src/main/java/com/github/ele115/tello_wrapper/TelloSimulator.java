@@ -41,7 +41,6 @@ class TelloSimulator implements ITelloDrone {
         var state = new TelloDroneState(
                 0, 0, (int) yaw,
                 0, 0, 0,
-                cachedState.getYaw() - (int) yaw,
                 temp, temp,
                 tof, height,
                 battery,

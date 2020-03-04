@@ -97,8 +97,7 @@ public class TelloStateDeserializer {
                     }
                 }
             }
-            var rotZ = oldState == null ? yaw : yaw - oldState.getYaw();
-            return new TelloDroneState(pitch, roll, yaw, speedX, speedY, speedZ, rotZ, tempLow, tempHigh, tofDistance, height, battery, motorTime, barometer, accelerationX, accelerationY, accelerationZ);
+            return new TelloDroneState(pitch, roll, yaw, speedX, speedY, speedZ, tempLow, tempHigh, tofDistance, height, battery, motorTime, barometer, accelerationX, accelerationY, accelerationZ);
         } catch (Exception e) {
             throw new TelloNetworkException("Error while parsing state input \"" + state + "\"");
         }
