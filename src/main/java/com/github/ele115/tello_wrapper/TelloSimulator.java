@@ -89,7 +89,7 @@ class TelloSimulator implements ITelloDrone {
         return true;
     }
 
-    private void sleep(long v) {
+    private static void sleep(long v) {
         try {
             Thread.sleep(v);
         } catch (InterruptedException ignored) {
@@ -104,7 +104,7 @@ class TelloSimulator implements ITelloDrone {
         for (var i = 0; i < 50; i++) {
             micro.z = i;
             updateState();
-            sleep(100);
+            sleep(50);
         }
     }
 
@@ -116,7 +116,7 @@ class TelloSimulator implements ITelloDrone {
         while (micro.z > 1) {
             micro.z--;
             updateState();
-            sleep(100);
+            sleep(50);
         }
 
         micro.z = 0;

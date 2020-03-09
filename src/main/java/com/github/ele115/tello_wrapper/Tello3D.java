@@ -7,6 +7,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.*;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
@@ -17,10 +18,12 @@ import javafx.stage.Stage;
 
 import java.awt.image.BufferedImage;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Tello3D extends Application {
     private static Tello3D me;
     private TelloSimulator sim;
+    private double mousePosX, mousePosY;
 
     public Tello3D() {
         me = this;
@@ -115,7 +118,7 @@ public class Tello3D extends Application {
         droneTranslate = new Translate(0, 0, 0);
         drone.getTransforms().add(droneYRotate);
         drone.getTransforms().add(droneTranslate);
-        drone.getTransforms().add(new Translate(-160 * SCALE_FACTOR, 0, 0));
+        drone.getTransforms().add(new Translate(-160 * SCALE_FACTOR, -1.25 * SCALE_FACTOR, 0));
 
         // Create the room
         // TODO: make it prettier
@@ -147,12 +150,39 @@ public class Tello3D extends Application {
 
         // The main window
         var mainCamera = new PerspectiveCamera();
-        mainCamera.setTranslateX(-960.0 / 2);
-        mainCamera.setTranslateY(-720.0 / 2 - 100 * SCALE_FACTOR);
-        mainCamera.setTranslateZ(0);
+        var mainX = new AtomicReference<>(0.0);
+        var mainY = new AtomicReference<>(0.0);
+        var mainRotateX = new Rotate(0, Rotate.X_AXIS);
+        var mainRotateY = new Rotate(0, Rotate.Y_AXIS);
+        mainCamera.getTransforms().add(new Translate(-960.0 / 2, -720.0 / 2 - 100 * SCALE_FACTOR, 0));
+        mainCamera.getTransforms().add(mainRotateX);
+        mainCamera.getTransforms().add(mainRotateY);
+
         var mainScene = new Scene(universe, 960, 720, true);
         mainScene.setFill(Color.BLACK);
         mainScene.setCamera(mainCamera);
+
+        mainScene.setOnMousePressed((MouseEvent me) -> {
+            mousePosX = me.getSceneX();
+            mousePosY = me.getSceneY();
+        });
+
+        mainScene.setOnMouseDragged((MouseEvent me) -> {
+            var dx = (mousePosX - me.getSceneX());
+            var dy = (mousePosY - me.getSceneY());
+            if (me.isPrimaryButtonDown()) {
+                mainX.updateAndGet(v -> v + dy / 720 * 120);
+                mainY.updateAndGet(v -> v - dx / 960 * 120);
+            }
+            mousePosX = me.getSceneX();
+            mousePosY = me.getSceneY();
+        });
+
+        mainScene.setOnMouseReleased((MouseEvent me) -> {
+            mainRotateX.setAngle(mainX.get());
+            mainRotateY.setAngle(mainY.get());
+        });
+
         stage.setResizable(false);
         stage.setTitle("F111");
         stage.setScene(mainScene);

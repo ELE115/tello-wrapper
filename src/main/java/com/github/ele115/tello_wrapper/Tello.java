@@ -25,6 +25,10 @@ public final class Tello {
             var sim = new TelloSimulator(false);
             var t = new Thread(() -> Application.launch(Tello3D.class));
             t.start();
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ignored) {
+            }
             Tello3D.getInstance().setSimulator(sim);
             return sim;
         }
