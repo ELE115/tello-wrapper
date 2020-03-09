@@ -52,6 +52,12 @@ public class Tello3D extends Application {
             }
         });
         t.start();
+        while (!initialized.get()) {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException ignored) {
+            }
+        }
     }
 
     private final static double SCALE_FACTOR = 1.9; // pixels / cm
@@ -192,9 +198,9 @@ public class Tello3D extends Application {
     }
 
     private void updateDrone(TelloMicroState micro) {
-        droneTranslate.setZ(-micro.x);
-        droneTranslate.setX(micro.y);
-        droneTranslate.setY(-micro.z);
+        droneTranslate.setZ(-micro.x * SCALE_FACTOR);
+        droneTranslate.setX(micro.y * SCALE_FACTOR);
+        droneTranslate.setY(-micro.z * SCALE_FACTOR);
         droneYRotate.setAngle(micro.yaw);
         makeSnapshot();
     }
@@ -206,5 +212,15 @@ public class Tello3D extends Application {
         var img = new WritableImage(960, 720);
         BufferedImage snapshot = SwingFXUtils.fromFXImage(universe.snapshot(dronePars, img), null);
         sim.issueFrame(new TelloVideoFrame(snapshot, null));
+    }
+
+    public void addObstacle(double x, double y, Color c) {
+        Platform.runLater(() -> {
+            var o = new Cylinder(30 * SCALE_FACTOR, 200 * SCALE_FACTOR);
+            o.getTransforms().add(new Translate(-160 * SCALE_FACTOR, -100 * SCALE_FACTOR, 0));
+            o.getTransforms().add(new Translate(y * SCALE_FACTOR, 0, -x * SCALE_FACTOR));
+            o.setMaterial(new PhongMaterial(c));
+            universe.getChildren().add(o);
+        });
     }
 }

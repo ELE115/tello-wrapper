@@ -57,7 +57,7 @@ public final class Tello {
         }
     }
 
-    public static Tello3D Simulator() {
+    public static Tello3D getSimulator() {
         return Tello3D.getInstance();
     }
 }
