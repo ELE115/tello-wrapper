@@ -17,10 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-class TelloMicroState {
-    public double x, y, z, yaw;
-}
-
 class TelloSimulator implements ITelloDrone {
     private List<VideoListener> videoListeners = new ArrayList<>();
     private List<StateListener> stateListeners = new ArrayList<>();
