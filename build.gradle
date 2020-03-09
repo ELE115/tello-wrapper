@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'com.jfrog.bintray' version '1.8.4'
+    id 'org.openjfx.javafxplugin' version '0.0.8'
     id 'maven-publish'
 }
 
@@ -17,6 +18,11 @@ targetCompatibility = 1.11
 dependencies {
     implementation 'org.bytedeco:javacv-platform:1.5.2'
     implementation 'com.github.b1f6c1c4:mac-to-ip:1.0.0'
+}
+
+javafx {
+    version = "11"
+    modules = [ 'javafx.controls' ]
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
