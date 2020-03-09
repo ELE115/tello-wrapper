@@ -21,13 +21,14 @@ public final class Tello {
             return new TelloSimulator(true);
         if (droneId == null)
             throw new RuntimeException("Please specify your Drone ID");
-        if (droneId.equals("3d-simulator")) {
+        if (droneId.equals("simulator")) {
             var sim = new TelloSimulator(false);
-            Application.launch(Tello3D.class);
+            var t = new Thread(() -> Application.launch(Tello3D.class));
+            t.start();
             Tello3D.getInstance().setSimulator(sim);
             return sim;
         }
-        if (droneId.equals("simulator"))
+        if (droneId.equals("simulator-simple"))
             return new TelloSimulator(false);
         if (droneId.equals("default")) {
             var drone = WifiDroneFactory.build();
@@ -50,5 +51,9 @@ public final class Tello {
             drone.connect(ip);
             return drone;
         }
+    }
+
+    public static Tello3D Simulator() {
+        return Tello3D.getInstance();
     }
 }

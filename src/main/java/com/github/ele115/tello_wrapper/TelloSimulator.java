@@ -3,6 +3,7 @@ package com.github.ele115.tello_wrapper;
 import com.github.ele115.tello_wrapper.tello4j.api.state.StateListener;
 import com.github.ele115.tello_wrapper.tello4j.api.state.TelloDroneState;
 import com.github.ele115.tello_wrapper.tello4j.api.video.TelloVideoExportType;
+import com.github.ele115.tello_wrapper.tello4j.api.video.TelloVideoFrame;
 import com.github.ele115.tello_wrapper.tello4j.api.video.VideoListener;
 import com.github.ele115.tello_wrapper.tello4j.api.world.FlipDirection;
 import com.github.ele115.tello_wrapper.tello4j.api.world.MovementDirection;
@@ -14,18 +15,21 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+
+class TelloMicroState {
+    public double x, y, z, yaw;
+}
 
 class TelloSimulator implements ITelloDrone {
     private List<VideoListener> videoListeners = new ArrayList<>();
     private List<StateListener> stateListeners = new ArrayList<>();
+    private List<Consumer<TelloMicroState>> microListeners = new ArrayList<>();
     private TelloDroneState cachedState;
     private TelloVideoExportType videoExportType = TelloVideoExportType.BUFFERED_IMAGE;
 
     private boolean streaming;
-    private double x = 0;
-    private double y = 0;
-    private double yaw = 0;
-    private double height = 0;
+    private TelloMicroState micro;
     private int speed;
 
     private final boolean traceable;
@@ -39,7 +43,7 @@ class TelloSimulator implements ITelloDrone {
         var barometer = fetchBarometer();
         var acc = fetchAcceleration();
         var state = new TelloDroneState(
-                0, 0, (int) yaw,
+                0, 0, (int) micro.yaw,
                 0, 0, 0,
                 temp, temp,
                 tof, height,
@@ -48,14 +52,13 @@ class TelloSimulator implements ITelloDrone {
                 barometer,
                 acc[0], acc[1], acc[2]
         );
-        stateListeners.forEach((sl) -> {
-            sl.onStateChanged(cachedState, state);
-        });
+        stateListeners.forEach((sl) -> sl.onStateChanged(cachedState, state));
+        microListeners.forEach((sl) -> sl.accept(micro));
 
         if (traceable) {
             try {
-                var s = x + "," + y + "," +
-                        yaw + "," + Double.toString(height) + "\n";
+                var s = micro.x + "," + micro.y + "," +
+                        micro.yaw + "," + Double.toString(height) + "\n";
                 Files.write(Paths.get("./tello-simulator.trace"), s.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             } catch (IOException e) {
                 throw new RuntimeException("Cannot append to trace file");
@@ -66,6 +69,11 @@ class TelloSimulator implements ITelloDrone {
     }
 
     TelloSimulator(boolean trace) {
+        micro = new TelloMicroState();
+        micro.x = 0;
+        micro.y = 0;
+        micro.z = 0;
+        micro.yaw = 0;
         traceable = trace;
         if (traceable) {
             try {
@@ -83,13 +91,26 @@ class TelloSimulator implements ITelloDrone {
 
     @Override
     public void takeoff() {
-        height = 50;
-        updateState();
+        if (micro.z > 0)
+            return;
+
+        for (var i = 0; i < 50; i++) {
+            micro.z = i;
+            updateState();
+        }
     }
 
     @Override
     public void land() {
-        height = 0;
+        if (micro.z <= 0)
+            return;
+
+        while (micro.z > 1) {
+            micro.z--;
+            updateState();
+        }
+
+        micro.z = 0;
         updateState();
     }
 
@@ -105,36 +126,37 @@ class TelloSimulator implements ITelloDrone {
 
     @Override
     public void emergency() {
-        height = 0;
+        micro.z = 0;
         updateState();
     }
 
     @Override
     public void moveDirection(MovementDirection direction, int cm) {
-        if (height == 0)
+        // TODO: call updateState multiple times
+        if (micro.z == 0)
             throw new RuntimeException("Not taken off yet");
         switch (direction) {
             case UP:
-                height += cm;
+                micro.z += cm;
                 break;
             case DOWN:
-                height -= cm;
+                micro.z -= cm;
                 break;
             case FORWARD:
-                x += Math.sin(yaw / 180 * Math.PI) * cm;
-                y += Math.cos(yaw / 180 * Math.PI) * cm;
+                micro.x += Math.sin(micro.yaw / 180 * Math.PI) * cm;
+                micro.y += Math.cos(micro.yaw / 180 * Math.PI) * cm;
                 break;
             case BACKWARD:
-                x -= Math.sin(yaw / 180 * Math.PI) * cm;
-                y -= Math.cos(yaw / 180 * Math.PI) * cm;
+                micro.x -= Math.sin(micro.yaw / 180 * Math.PI) * cm;
+                micro.y -= Math.cos(micro.yaw / 180 * Math.PI) * cm;
                 break;
             case LEFT:
-                x -= Math.cos(yaw / 180 * Math.PI) * cm;
-                y += Math.sin(yaw / 180 * Math.PI) * cm;
+                micro.x -= Math.cos(micro.yaw / 180 * Math.PI) * cm;
+                micro.y += Math.sin(micro.yaw / 180 * Math.PI) * cm;
                 break;
             case RIGHT:
-                x += Math.cos(yaw / 180 * Math.PI) * cm;
-                y -= Math.sin(yaw / 180 * Math.PI) * cm;
+                micro.x += Math.cos(micro.yaw / 180 * Math.PI) * cm;
+                micro.y -= Math.sin(micro.yaw / 180 * Math.PI) * cm;
                 break;
         }
         updateState();
@@ -142,14 +164,15 @@ class TelloSimulator implements ITelloDrone {
 
     @Override
     public void turn(TurnDirection direction, int degrees) {
-        if (height == 0)
+        // TODO: call updateState multiple times
+        if (micro.z == 0)
             throw new RuntimeException("Not taken off yet");
         switch (direction) {
             case LEFT:
-                yaw -= degrees;
+                micro.yaw -= degrees;
                 break;
             case RIGHT:
-                yaw += degrees;
+                micro.yaw += degrees;
                 break;
         }
         updateState();
@@ -157,7 +180,8 @@ class TelloSimulator implements ITelloDrone {
 
     @Override
     public void flip(FlipDirection direction) {
-        if (height == 0)
+        // TODO: call updateState multiple times
+        if (micro.z == 0)
             throw new RuntimeException("Not taken off yet");
         switch (direction) {
             case LEFT:
@@ -177,21 +201,23 @@ class TelloSimulator implements ITelloDrone {
 
     @Override
     public void move(int x, int y, int z, int speed) {
-        if (height == 0)
+        // TODO: call updateState multiple times
+        if (micro.z == 0)
             throw new RuntimeException("Not taken off yet");
-        this.x += Math.sin(yaw / 180 * Math.PI) * y + Math.cos(yaw / 180 * Math.PI) * x;
-        this.y += Math.cos(yaw / 180 * Math.PI) * y - Math.sin(yaw / 180 * Math.PI) * x;
-        height += z;
+        micro.x += Math.sin(micro.yaw / 180 * Math.PI) * y + Math.cos(micro.yaw / 180 * Math.PI) * x;
+        micro.y += Math.cos(micro.yaw / 180 * Math.PI) * y - Math.sin(micro.yaw / 180 * Math.PI) * x;
+        micro.z += z;
         updateState();
     }
 
     @Override
     public void curve(int x1, int y1, int z1, int x2, int y2, int z2, int speed) {
-        if (height == 0)
+        // TODO: call updateState multiple times
+        if (micro.z == 0)
             throw new RuntimeException("Not taken off yet");
-        x += Math.sin(yaw / 180 * Math.PI) * y2 + Math.cos(yaw / 180 * Math.PI) * x2;
-        y += Math.cos(yaw / 180 * Math.PI) * y2 - Math.sin(yaw / 180 * Math.PI) * x2;
-        height += z2;
+        micro.x += Math.sin(micro.yaw / 180 * Math.PI) * y2 + Math.cos(micro.yaw / 180 * Math.PI) * x2;
+        micro.y += Math.cos(micro.yaw / 180 * Math.PI) * y2 - Math.sin(micro.yaw / 180 * Math.PI) * x2;
+        micro.z += z2;
         updateState();
     }
 
@@ -203,6 +229,7 @@ class TelloSimulator implements ITelloDrone {
 
     @Override
     public void sendRemoteControlInputs(int lr, int fb, int ud, int yaw) {
+        // TODO: call updateState multiple times
         turnRight(yaw);
         move(lr, fb, ud, 0);
     }
@@ -234,7 +261,7 @@ class TelloSimulator implements ITelloDrone {
 
     @Override
     public int fetchHeight() {
-        return (int) height;
+        return (int) micro.z;
     }
 
     @Override
@@ -244,7 +271,7 @@ class TelloSimulator implements ITelloDrone {
 
     @Override
     public int[] fetchAttitude() {
-        return new int[]{(int) x, (int) y, (int) height};
+        return new int[]{(int) micro.x, (int) micro.y, (int) micro.z};
     }
 
     @Override
@@ -337,6 +364,14 @@ class TelloSimulator implements ITelloDrone {
         return stateListeners;
     }
 
+    public void addMicroListener(Consumer<TelloMicroState> listener) {
+        this.microListeners.add(listener);
+    }
+
+    public boolean removeMicroListener(Consumer<TelloMicroState> listener) {
+        return this.microListeners.remove(listener);
+    }
+
     @Override
     public TelloDroneState getCachedState() {
         return cachedState;
@@ -355,5 +390,10 @@ class TelloSimulator implements ITelloDrone {
     @Override
     public void setVideoExportType(TelloVideoExportType videoExportType) {
         this.videoExportType = videoExportType;
+    }
+
+    public void issueFrame(TelloVideoFrame frame) {
+        if (streaming)
+            this.videoListeners.forEach((vl) -> vl.onFrameReceived(frame));
     }
 }
