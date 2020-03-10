@@ -1,7 +1,6 @@
 package com.github.ele115.tello_wrapper;
 
 import com.github.ele115.tello_wrapper.tello4j.api.drone.WifiDroneFactory;
-import javafx.application.Application;
 
 public final class Tello {
     private Tello() {
@@ -23,13 +22,7 @@ public final class Tello {
             throw new RuntimeException("Please specify your Drone ID");
         if (droneId.equals("simulator")) {
             var sim = new TelloSimulator(false);
-            var t = new Thread(() -> Application.launch(Tello3D.class));
-            t.start();
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException ignored) {
-            }
-            Tello3D.getInstance().setSimulator(sim);
+            Tello3D.getInstance().addSimulator(sim);
             return sim;
         }
         if (droneId.equals("simulator-simple"))
@@ -55,6 +48,20 @@ public final class Tello {
             drone.connect(ip);
             return drone;
         }
+    }
+
+    public static ITelloDrone Connect(String droneId, double rX, double rY, double rAngle) {
+        if (!droneId.equals("simulator"))
+            throw new RuntimeException("Please use Tello::Connect(String droneId)");
+
+        var init = new TelloMicroState();
+        init.rX = rX;
+        init.rY = rY;
+        init.rZ = 0;
+        init.rAngle = rAngle;
+        var sim = new TelloSimulator(false, init);
+        Tello3D.getInstance().addSimulator(sim);
+        return sim;
     }
 
     public static Tello3D getSimulator() {
