@@ -47,6 +47,12 @@ public class Tello3D extends Application {
         Platform.runLater(() -> this.drones.add(new Drone(sim)));
     }
 
+    private int snapshotInt = 50;
+
+    public void setSnapshotInt(int i) {
+        this.snapshotInt = i;
+    }
+
     private final static double SCALE_FACTOR = 1.9; // pixels / cm
     private Group universe;
 
@@ -124,10 +130,9 @@ public class Tello3D extends Application {
             droneTranslate.setX(micro.rY * SCALE_FACTOR);
             droneTranslate.setY(-micro.rZ * SCALE_FACTOR);
             droneYRotate.setAngle(90 - micro.rAngle);
-            makeSnapshot();
         }
 
-        private synchronized void makeSnapshot() {
+        private void makeSnapshot() {
             var img = new WritableImage(960, 720);
             BufferedImage snapshot = SwingFXUtils.fromFXImage(universe.snapshot(dronePars, img), null);
             var frame = new TelloVideoFrame(snapshot, null);
@@ -209,12 +214,14 @@ public class Tello3D extends Application {
         var t = new Thread(() -> {
             while (true) {
                 try {
-                    Thread.sleep(10);
+                    if (snapshotInt > 0)
+                        Thread.sleep(snapshotInt);
+                    else
+                        Thread.sleep(1000);
                 } catch (InterruptedException ignored) {
                 }
-                Platform.runLater(() -> {
-                    this.drones.forEach(Drone::makeSnapshot);
-                });
+                if (snapshotInt > 0)
+                    Platform.runLater(() -> this.drones.forEach(Drone::makeSnapshot));
             }
         });
         t.start();
