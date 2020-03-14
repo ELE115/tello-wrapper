@@ -165,8 +165,12 @@ class TelloSimulator implements ITelloDrone {
                 }
                 break;
             case BACKWARD:
-                micro.rX -= Math.cos(micro.rAngle / 180 * Math.PI) * cm;
-                micro.rY -= Math.sin(micro.rAngle / 180 * Math.PI) * cm;
+                for (var i = 0; i < 100; i++) {
+                    micro.rX -= Math.cos(micro.rAngle / 180 * Math.PI) * cm / 100;
+                    micro.rY -= Math.sin(micro.rAngle / 180 * Math.PI) * cm / 100;
+                    updateState();
+                    sleep(2000 / speed);
+                }
                 break;
             case LEFT:
                 micro.rX -= Math.sin(micro.rAngle / 180 * Math.PI) * cm;
