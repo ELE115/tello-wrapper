@@ -5,9 +5,13 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.*;
+import javafx.scene.Group;
+import javafx.scene.PerspectiveCamera;
+import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
@@ -23,6 +27,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Tello3D extends Application {
     private static final AtomicReference<Tello3D> me = new AtomicReference<>(null);
+    private static final int droneWidth = 960, droneHeight = 720;
+    private static int defaultWidth = 960, defaultHeight = 720;
+    private boolean delayUpdate = false;
     private final List<Drone> drones = new ArrayList<>();
     private double mousePosX, mousePosY;
 
@@ -41,6 +48,15 @@ public class Tello3D extends Application {
             }
         }
         return m;
+    }
+
+    public static void setWindowSize(int w, int h) {
+        defaultWidth = w;
+        defaultHeight = h;
+    }
+
+    public void setDelayUpdate(boolean v) {
+        delayUpdate = v;
     }
 
     void addSimulator(TelloSimulator sim) {
@@ -104,13 +120,13 @@ public class Tello3D extends Application {
                 var c = new PerspectiveCamera();
                 c.getTransforms().add(new Rotate(90, Rotate.Y_AXIS));
                 c.getTransforms().add(new Translate(0, 0, 1250));
-                c.getTransforms().add(new Translate(-960.0 / 2, -720.0 / 2 - 1.25 * SCALE_FACTOR, 0));
+                c.getTransforms().add(new Translate(-droneWidth / 2.0, -droneHeight / 2.0 - 1.25 * SCALE_FACTOR, 0));
                 drone.getChildren().add(c);
 
                 dronePars = new SnapshotParameters();
                 dronePars.setCamera(c);
                 dronePars.setFill(Color.BLACK);
-                dronePars.setViewport(new Rectangle2D(0, 0, 960, 720));
+                dronePars.setViewport(new Rectangle2D(0, 0, droneWidth, droneHeight));
                 dronePars.setDepthBuffer(true);
             }
             droneYRotate = new Rotate(0, Rotate.Y_AXIS);
@@ -133,7 +149,7 @@ public class Tello3D extends Application {
         }
 
         private void makeSnapshot() {
-            var img = new WritableImage(960, 720);
+            var img = new WritableImage(droneWidth, droneHeight);
             BufferedImage snapshot = SwingFXUtils.fromFXImage(universe.snapshot(dronePars, img), null);
             var frame = new TelloVideoFrame(snapshot, null);
             this.sim.issueFrame(frame);
@@ -173,15 +189,26 @@ public class Tello3D extends Application {
         var mainCamera = new PerspectiveCamera();
         var mainX = new AtomicReference<>(0.0);
         var mainY = new AtomicReference<>(0.0);
+        var mainMX = new AtomicReference<>(0.0);
+        var mainMY = new AtomicReference<>(0.0);
         var mainRotateX = new Rotate(0, Rotate.X_AXIS);
         var mainRotateY = new Rotate(0, Rotate.Y_AXIS);
-        mainCamera.getTransforms().add(new Translate(-960.0 / 2, -720.0 / 2 - 100 * SCALE_FACTOR, 0));
-        mainCamera.getTransforms().add(mainRotateX);
+        mainCamera.setFieldOfView(50);
         mainCamera.getTransforms().add(mainRotateY);
+        mainCamera.getTransforms().add(mainRotateX);
+        mainCamera.getTransforms().add(new Translate(-defaultWidth / 2.0, -defaultHeight / 2.0 - 100 * SCALE_FACTOR, 0));
+        var mainMoveZ = new Translate(0, 0, 0);
+        mainCamera.getTransforms().add(mainMoveZ);
+        var mainMoveXY = new Translate(0, 0, 0);
+        mainCamera.getTransforms().add(mainMoveXY);
 
-        var mainScene = new Scene(universe, 960, 720, true);
+        var mainScene = new Scene(universe, defaultWidth, defaultHeight, true);
         mainScene.setFill(Color.BLACK);
         mainScene.setCamera(mainCamera);
+
+        mainScene.setOnScroll((ScrollEvent e) -> {
+            mainMoveZ.setZ(mainMoveZ.getZ() + e.getDeltaY());
+        });
 
         mainScene.setOnMousePressed((MouseEvent me) -> {
             mousePosX = me.getSceneX();
@@ -191,17 +218,31 @@ public class Tello3D extends Application {
         mainScene.setOnMouseDragged((MouseEvent me) -> {
             var dx = (mousePosX - me.getSceneX());
             var dy = (mousePosY - me.getSceneY());
-            if (me.isPrimaryButtonDown()) {
-                mainX.updateAndGet(v -> v + dy / 720 * 120);
-                mainY.updateAndGet(v -> v - dx / 960 * 120);
-            }
             mousePosX = me.getSceneX();
             mousePosY = me.getSceneY();
+            if (me.isPrimaryButtonDown()) {
+                mainX.updateAndGet(v -> v + dy / defaultHeight * 120);
+                mainY.updateAndGet(v -> v - dx / defaultWidth * 120);
+                if (!delayUpdate) {
+                    mainRotateX.setAngle(mainX.get());
+                    mainRotateY.setAngle(mainY.get());
+                }
+            }
+            if (me.isSecondaryButtonDown()) {
+                mainMX.updateAndGet(v -> v + dx);
+                mainMY.updateAndGet(v -> v + dy);
+                if (!delayUpdate) {
+                    mainMoveXY.setX(mainMX.get());
+                    mainMoveXY.setY(mainMY.get());
+                }
+            }
         });
 
         mainScene.setOnMouseReleased((MouseEvent me) -> {
             mainRotateX.setAngle(mainX.get());
             mainRotateY.setAngle(mainY.get());
+            mainMoveXY.setX(mainMX.get());
+            mainMoveXY.setY(mainMY.get());
         });
 
         stage.setResizable(false);

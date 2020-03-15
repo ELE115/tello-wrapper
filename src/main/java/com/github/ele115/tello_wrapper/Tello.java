@@ -67,4 +67,8 @@ public final class Tello {
     public static Tello3D getSimulator() {
         return Tello3D.getInstance();
     }
+
+    public static void setWindowSize(int w, int h) {
+        Tello3D.setWindowSize(w, h);
+    }
 }
