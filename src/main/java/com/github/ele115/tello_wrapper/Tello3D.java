@@ -15,6 +15,7 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
+import javafx.scene.shape.Sphere;
 import javafx.scene.shape.Cylinder;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
@@ -289,6 +290,16 @@ public class Tello3D extends Application {
     public void addBox(double x, double y, Color c) {
         Platform.runLater(() -> {
             var o = new Box(30 * SCALE_FACTOR, 30 * SCALE_FACTOR, 30 * SCALE_FACTOR);
+            o.getTransforms().add(new Translate(-160 * SCALE_FACTOR, -15 * SCALE_FACTOR, 0));
+            o.getTransforms().add(new Translate(y * SCALE_FACTOR, 0, -x * SCALE_FACTOR));
+            o.setMaterial(new PhongMaterial(c));
+            universe.getChildren().add(o);
+        });
+    }
+
+    public void addBall(double x, double y, Color c) {
+        Platform.runLater(() -> {
+            var o = new Sphere(15*SCALE_FACTOR);
             o.getTransforms().add(new Translate(-160 * SCALE_FACTOR, -15 * SCALE_FACTOR, 0));
             o.getTransforms().add(new Translate(y * SCALE_FACTOR, 0, -x * SCALE_FACTOR));
             o.setMaterial(new PhongMaterial(c));
