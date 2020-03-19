@@ -152,12 +152,14 @@ class TelloSimulator implements ITelloDrone {
             case UP:
                 for (var i = 0; i < 100; i++) {
                     micro.rZ += cm / 100;
+                    updateState();
                     sleep(2000 / speed);
                 }
                 break;
             case DOWN:
                 for (var i = 0; i < 100; i++) {
                     micro.rZ -= cm / 100;
+                    updateState();
                     sleep(2000 / speed);
                 }
                 break;
