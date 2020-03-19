@@ -146,15 +146,20 @@ class TelloSimulator implements ITelloDrone {
 
     @Override
     public void moveDirection(MovementDirection direction, int cm) {
-        // TODO: call updateState multiple times
         if (micro.rZ == 0)
             throw new RuntimeException("Not taken off yet");
         switch (direction) {
             case UP:
-                micro.rZ += cm;
+                for (var i = 0; i < 100; i++) {
+                    micro.rZ += cm / 100;
+                    sleep(2000 / speed);
+                }
                 break;
             case DOWN:
-                micro.rZ -= cm;
+                for (var i = 0; i < 100; i++) {
+                    micro.rZ -= cm / 100;
+                    sleep(2000 / speed);
+                }
                 break;
             case FORWARD:
                 for (var i = 0; i < 100; i++) {
@@ -194,15 +199,22 @@ class TelloSimulator implements ITelloDrone {
 
     @Override
     public void turn(TurnDirection direction, int degrees) {
-        // TODO: call updateState multiple times
         if (micro.rZ == 0)
             throw new RuntimeException("Not taken off yet");
         switch (direction) {
             case LEFT:
-                micro.rAngle += degrees;
+                for (var i = 0; i < 100; i++) {
+                    micro.rAngle += degrees / 100;
+                    updateState();
+                    sleep(2000 / speed);
+                }
                 break;
             case RIGHT:
-                micro.rAngle -= degrees;
+                for (var i = 0; i < 100; i++) {
+                    micro.rAngle -= degrees / 100;
+                    updateState();
+                    sleep(2000 / speed);
+                }
                 break;
         }
         updateState();
@@ -231,24 +243,26 @@ class TelloSimulator implements ITelloDrone {
 
     @Override
     public void move(int x, int y, int z, int speed) {
-        // TODO: call updateState multiple times
         if (micro.rZ == 0)
             throw new RuntimeException("Not taken off yet");
-        micro.rX += -Math.sin(micro.rAngle / 180 * Math.PI) * y + Math.cos(micro.rAngle / 180 * Math.PI) * x;
-        micro.rY += Math.cos(micro.rAngle / 180 * Math.PI) * y + Math.sin(micro.rAngle / 180 * Math.PI) * x;
-        micro.rZ += z;
-        updateState();
+        for (var i = 0; i < 100; i++) {
+            micro.rX += (-Math.sin(micro.rAngle / 180 * Math.PI) * y + Math.cos(micro.rAngle / 180 * Math.PI) * x) / 100;
+            micro.rY += (Math.cos(micro.rAngle / 180 * Math.PI) * y + Math.sin(micro.rAngle / 180 * Math.PI) * x) / 100;
+            micro.rZ += z / 100;
+            updateState();
+        }
     }
 
     @Override
     public void curve(int x1, int y1, int z1, int x2, int y2, int z2, int speed) {
-        // TODO: call updateState multiple times
         if (micro.rZ == 0)
             throw new RuntimeException("Not taken off yet");
-        micro.rX += -Math.sin(micro.rAngle / 180 * Math.PI) * y2 + Math.cos(micro.rAngle / 180 * Math.PI) * x2;
-        micro.rY += Math.cos(micro.rAngle / 180 * Math.PI) * y2 + Math.sin(micro.rAngle / 180 * Math.PI) * x2;
-        micro.rZ += z2;
-        updateState();
+        for (var i = 0; i < 100; i++) {
+            micro.rX += (-Math.sin(micro.rAngle / 180 * Math.PI) * y2 + Math.cos(micro.rAngle / 180 * Math.PI) * x2) / 100;
+            micro.rY += (Math.cos(micro.rAngle / 180 * Math.PI) * y2 + Math.sin(micro.rAngle / 180 * Math.PI) * x2) / 100;
+            micro.rZ += z2 / 100;
+            updateState();
+        }
     }
 
     @Override
