@@ -75,7 +75,9 @@ public class Tello3D extends Application {
     private class Drone {
         private TelloSimulator sim;
         private Translate droneTranslate;
+        private Rotate droneXRotate;
         private Rotate droneYRotate;
+        private Rotate droneZRotate;
         private SnapshotParameters dronePars;
 
         public Drone(TelloSimulator sim) {
@@ -129,11 +131,15 @@ public class Tello3D extends Application {
                 dronePars.setViewport(new Rectangle2D(0, 0, droneWidth, droneHeight));
                 dronePars.setDepthBuffer(true);
             }
+            droneXRotate = new Rotate(0, Rotate.X_AXIS);
             droneYRotate = new Rotate(0, Rotate.Y_AXIS);
+            droneZRotate = new Rotate(0, Rotate.Z_AXIS);
             droneTranslate = new Translate(0, 0, 0);
             drone.getTransforms().add(new Translate(-160 * SCALE_FACTOR, -1.25 * SCALE_FACTOR, 0));
             drone.getTransforms().add(droneTranslate);
             drone.getTransforms().add(droneYRotate);
+            drone.getTransforms().add(droneZRotate);
+            drone.getTransforms().add(droneXRotate);
 
             universe.getChildren().add(drone);
 
@@ -145,7 +151,9 @@ public class Tello3D extends Application {
             droneTranslate.setZ(-micro.rX * SCALE_FACTOR);
             droneTranslate.setX(micro.rY * SCALE_FACTOR);
             droneTranslate.setY(-micro.rZ * SCALE_FACTOR);
+            droneXRotate.setAngle(micro.roll);
             droneYRotate.setAngle(90 - micro.rAngle);
+            droneZRotate.setAngle(-micro.pitch);
         }
 
         private void makeSnapshot() {
