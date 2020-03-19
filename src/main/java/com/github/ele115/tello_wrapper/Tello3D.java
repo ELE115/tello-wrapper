@@ -277,4 +277,14 @@ public class Tello3D extends Application {
             universe.getChildren().add(o);
         });
     }
+
+    public void addBox(double x, double y, Color c) {
+        Platform.runLater(() -> {
+            var o = new Box(30 * SCALE_FACTOR, 30 * SCALE_FACTOR, 30 * SCALE_FACTOR);
+            o.getTransforms().add(new Translate(-160 * SCALE_FACTOR, -15 * SCALE_FACTOR, 0));
+            o.getTransforms().add(new Translate(y * SCALE_FACTOR, 0, -x * SCALE_FACTOR));
+            o.setMaterial(new PhongMaterial(c));
+            universe.getChildren().add(o);
+        });
+    }
 }
