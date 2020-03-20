@@ -1,11 +1,13 @@
 package com.github.ele115.tello_wrapper;
 
+import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloNetworkException;
 import com.github.ele115.tello_wrapper.tello4j.api.video.TelloVideoFrame;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
@@ -15,6 +17,7 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
+import javafx.scene.shape.Shape;
 import javafx.scene.shape.Sphere;
 import javafx.scene.shape.Cylinder;
 import javafx.scene.transform.Rotate;
@@ -80,6 +83,7 @@ public class Tello3D extends Application {
         private Rotate droneYRotate;
         private Rotate droneZRotate;
         private SnapshotParameters dronePars;
+        private Group drone;
 
         public Drone(TelloSimulator sim) {
             var drone = new Group();
@@ -124,7 +128,7 @@ public class Tello3D extends Application {
                 c.getTransforms().add(new Rotate(90, Rotate.Y_AXIS));
                 c.getTransforms().add(new Translate(0, 0, 1250));
                 c.getTransforms().add(new Translate(-droneWidth / 2.0, -droneHeight / 2.0 - 1.25 * SCALE_FACTOR, 0));
-                drone.getChildren().add(c);
+                //drone.getChildren().add(c);
 
                 dronePars = new SnapshotParameters();
                 dronePars.setCamera(c);
@@ -144,6 +148,7 @@ public class Tello3D extends Application {
 
             universe.getChildren().add(drone);
 
+            this.drone = drone;
             this.sim = sim;
             sim.addMicroListener((s) -> Platform.runLater(() -> updateDrone(s)));
         }
@@ -155,6 +160,7 @@ public class Tello3D extends Application {
             droneXRotate.setAngle(micro.roll);
             droneYRotate.setAngle(90 - micro.rAngle);
             droneZRotate.setAngle(-micro.pitch);
+            collisionDetection();
         }
 
         private void makeSnapshot() {
@@ -162,6 +168,30 @@ public class Tello3D extends Application {
             BufferedImage snapshot = SwingFXUtils.fromFXImage(universe.snapshot(dronePars, img), null);
             var frame = new TelloVideoFrame(snapshot, null);
             this.sim.issueFrame(frame);
+        }
+
+        private void collisionDetection(){
+            for (Node obj : universe.getChildren()){
+                if ((obj != this.drone) && (this.drone.getBoundsInParent().intersects(obj.getBoundsInParent()))){
+                    throw new RuntimeException("Your drone hits obstacle " + obj);
+                }
+
+                // Todo: Use intersection of shapes instead of bounding box. However, not sure if
+                // it works for 3D objects (JavaFX seems does not support 3D intersection)
+                /*
+                if (obj != this.drone){
+                    for (Node droneParts: this.drone.getChildren()){
+                        Shape intersect = Shape.intersect((Shape)droneParts, (Shape)obj);
+                        if (intersect.getBoundsInParent().getWidth() > 0) {
+                            //System.out.println(droneParts);
+                            //System.out.println(obj);
+                            throw new RuntimeException("Your drone hits obstacles");
+                        }
+                    }
+                }
+                */
+
+            }
         }
     }
 
@@ -172,23 +202,28 @@ public class Tello3D extends Application {
         universe = new Group();
         {
             var f = new Box(500 * SCALE_FACTOR, 0.1 * SCALE_FACTOR, 500 * SCALE_FACTOR);
+            f.setAccessibleRoleDescription("Floor");
             f.setMaterial(new PhongMaterial(Color.DARKGRAY));
+            f.getTransforms().add(new Translate(0, 0.1 * SCALE_FACTOR, 0));
             universe.getChildren().add(f);
         }
         {
             var f = new Box(0.1 * SCALE_FACTOR, 200 * SCALE_FACTOR, 500 * SCALE_FACTOR);
+            f.setAccessibleRoleDescription("Right Wall");
             f.setMaterial(new PhongMaterial(Color.LIGHTBLUE));
             f.getTransforms().add(new Translate(250 * SCALE_FACTOR, -100 * SCALE_FACTOR, 0));
             universe.getChildren().add(f);
         }
         {
             var f = new Box(0.1 * SCALE_FACTOR, 200 * SCALE_FACTOR, 500 * SCALE_FACTOR);
+            f.setAccessibleRoleDescription("Left Wall");
             f.setMaterial(new PhongMaterial(Color.RED));
             f.getTransforms().add(new Translate(-250 * SCALE_FACTOR, -100 * SCALE_FACTOR, 0));
             universe.getChildren().add(f);
         }
         {
             var f = new Box(500 * SCALE_FACTOR, 200 * SCALE_FACTOR, 0.1 * SCALE_FACTOR);
+            f.setAccessibleRoleDescription("Back Wall");
             f.setMaterial(new PhongMaterial(Color.PINK));
             f.getTransforms().add(new Translate(0, -100 * SCALE_FACTOR, 250 * SCALE_FACTOR));
             universe.getChildren().add(f);
