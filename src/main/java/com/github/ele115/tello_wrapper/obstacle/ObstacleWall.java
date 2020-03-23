@@ -1,6 +1,8 @@
 package com.github.ele115.tello_wrapper.obstacle;
 
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.scene.transform.Translate;
 
@@ -18,6 +20,7 @@ public class ObstacleWall extends Obstacle {
                 ((Box) o).setHeight(0.1);
                 ((Box) o).setDepth(500);
                 o.getTransforms().add(new Translate(shift, -v, 0));
+                ((PhongMaterial) o.getMaterial()).setDiffuseMap(new Image("/htree.png"));
                 break;
             case 2: // x < v
             case 3: // x > v
