@@ -126,8 +126,9 @@ public class Tello3D extends Application {
             }
             {
                 var c = new PerspectiveCamera();
+                c.setFieldOfView(50);
                 c.getTransforms().add(new Rotate(90, Rotate.Y_AXIS));
-                c.getTransforms().add(new Translate(0, 0, 1250));
+                c.getTransforms().add(new Translate(0, 0, 722));
                 c.getTransforms().add(new Translate(-droneWidth / 2.0, -droneHeight / 2.0 - 1.25 * SCALE_FACTOR, 0));
                 drone.getChildren().add(c);
 
