@@ -1,13 +1,13 @@
 package com.github.ele115.tello_wrapper;
 
-import com.github.ele115.tello_wrapper.tello4j.api.exception.TelloNetworkException;
+import com.github.ele115.tello_wrapper.obstacle.IObstacle;
+import com.github.ele115.tello_wrapper.obstacle.ObstacleWall;
 import com.github.ele115.tello_wrapper.tello4j.api.video.TelloVideoFrame;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
@@ -17,10 +17,9 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
-import javafx.scene.shape.Shape;
-import javafx.scene.shape.Sphere;
 import javafx.scene.shape.Cylinder;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 
@@ -35,6 +34,7 @@ public class Tello3D extends Application {
     private static int defaultWidth = 960, defaultHeight = 720;
     private boolean delayUpdate = false;
     private final List<Drone> drones = new ArrayList<>();
+    private final List<IObstacle> obstacles = new ArrayList<>();
     private double mousePosX, mousePosY;
 
     synchronized static Tello3D getInstance() {
@@ -74,7 +74,7 @@ public class Tello3D extends Application {
     }
 
     private final static double SCALE_FACTOR = 1.9; // pixels / cm
-    private Group universe;
+    private Group universe, uobstacles;
 
     private class Drone {
         private TelloSimulator sim;
@@ -83,7 +83,7 @@ public class Tello3D extends Application {
         private Rotate droneYRotate;
         private Rotate droneZRotate;
         private SnapshotParameters dronePars;
-        private Group drone;
+        private TelloMicroState micro;
 
         public Drone(TelloSimulator sim) {
             var drone = new Group();
@@ -128,7 +128,7 @@ public class Tello3D extends Application {
                 c.getTransforms().add(new Rotate(90, Rotate.Y_AXIS));
                 c.getTransforms().add(new Translate(0, 0, 1250));
                 c.getTransforms().add(new Translate(-droneWidth / 2.0, -droneHeight / 2.0 - 1.25 * SCALE_FACTOR, 0));
-                //drone.getChildren().add(c);
+                drone.getChildren().add(c);
 
                 dronePars = new SnapshotParameters();
                 dronePars.setCamera(c);
@@ -148,9 +148,14 @@ public class Tello3D extends Application {
 
             universe.getChildren().add(drone);
 
-            this.drone = drone;
             this.sim = sim;
-            sim.addMicroListener((s) -> Platform.runLater(() -> updateDrone(s)));
+            sim.addMicroListener((s) -> Platform.runLater(() -> {
+                updateDrone(s);
+                for (var obj : obstacles)
+                    obj.clear();
+                for (var d : drones)
+                    d.check();
+            }));
         }
 
         private void updateDrone(TelloMicroState micro) {
@@ -160,7 +165,17 @@ public class Tello3D extends Application {
             droneXRotate.setAngle(micro.roll);
             droneYRotate.setAngle(90 - micro.rAngle);
             droneZRotate.setAngle(-micro.pitch);
-            collisionDetection();
+            this.micro = micro;
+        }
+
+        public void check() {
+            if (micro == null)
+                return;
+
+            for (var obj : obstacles) {
+                if (obj.check(micro.rX, micro.rY, micro.rZ))
+                    System.err.println("Your drone hits " + obj);
+            }
         }
 
         private void makeSnapshot() {
@@ -169,65 +184,20 @@ public class Tello3D extends Application {
             var frame = new TelloVideoFrame(snapshot, null);
             this.sim.issueFrame(frame);
         }
-
-        private void collisionDetection(){
-            for (Node obj : universe.getChildren()){
-                if ((obj != this.drone) && (this.drone.getBoundsInParent().intersects(obj.getBoundsInParent()))){
-                    throw new RuntimeException("Your drone hits obstacle " + obj);
-                }
-
-                // Todo: Use intersection of shapes instead of bounding box. However, not sure if
-                // it works for 3D objects (JavaFX seems does not support 3D intersection)
-                /*
-                if (obj != this.drone){
-                    for (Node droneParts: this.drone.getChildren()){
-                        Shape intersect = Shape.intersect((Shape)droneParts, (Shape)obj);
-                        if (intersect.getBoundsInParent().getWidth() > 0) {
-                            //System.out.println(droneParts);
-                            //System.out.println(obj);
-                            throw new RuntimeException("Your drone hits obstacles");
-                        }
-                    }
-                }
-                */
-
-            }
-        }
     }
 
     @Override
     public void start(Stage stage) {
         // Create the room
-        // TODO: make it prettier
         universe = new Group();
-        {
-            var f = new Box(500 * SCALE_FACTOR, 0.1 * SCALE_FACTOR, 500 * SCALE_FACTOR);
-            f.setAccessibleRoleDescription("Floor");
-            f.setMaterial(new PhongMaterial(Color.DARKGRAY));
-            f.getTransforms().add(new Translate(0, 0.1 * SCALE_FACTOR, 0));
-            universe.getChildren().add(f);
-        }
-        {
-            var f = new Box(0.1 * SCALE_FACTOR, 200 * SCALE_FACTOR, 500 * SCALE_FACTOR);
-            f.setAccessibleRoleDescription("Right Wall");
-            f.setMaterial(new PhongMaterial(Color.LIGHTBLUE));
-            f.getTransforms().add(new Translate(250 * SCALE_FACTOR, -100 * SCALE_FACTOR, 0));
-            universe.getChildren().add(f);
-        }
-        {
-            var f = new Box(0.1 * SCALE_FACTOR, 200 * SCALE_FACTOR, 500 * SCALE_FACTOR);
-            f.setAccessibleRoleDescription("Left Wall");
-            f.setMaterial(new PhongMaterial(Color.RED));
-            f.getTransforms().add(new Translate(-250 * SCALE_FACTOR, -100 * SCALE_FACTOR, 0));
-            universe.getChildren().add(f);
-        }
-        {
-            var f = new Box(500 * SCALE_FACTOR, 200 * SCALE_FACTOR, 0.1 * SCALE_FACTOR);
-            f.setAccessibleRoleDescription("Back Wall");
-            f.setMaterial(new PhongMaterial(Color.PINK));
-            f.getTransforms().add(new Translate(0, -100 * SCALE_FACTOR, 250 * SCALE_FACTOR));
-            universe.getChildren().add(f);
-        }
+        uobstacles = new Group();
+        uobstacles.getTransforms().add(new Scale(SCALE_FACTOR, SCALE_FACTOR, SCALE_FACTOR));
+        uobstacles.getTransforms().add(new Translate(-160, 0, 0));
+        universe.getChildren().add(uobstacles);
+        addObstacle(new ObstacleWall(-0.1, 0, 160, Color.DARKGRAY)); // Floor
+        addObstacle(new ObstacleWall(250, 5, 160, Color.LIGHTBLUE)); // Front
+        addObstacle(new ObstacleWall(-250, 4, 160, Color.RED)); // Back
+        addObstacle(new ObstacleWall(-250, 2, 160, Color.PINK)); // Left
 
         // The main window
         var mainCamera = new PerspectiveCamera();
@@ -312,33 +282,10 @@ public class Tello3D extends Application {
         t.start();
     }
 
-    public void addObstacle(double x, double y, Color c) {
+    public void addObstacle(IObstacle o) {
         Platform.runLater(() -> {
-            var o = new Cylinder(30 * SCALE_FACTOR, 200 * SCALE_FACTOR);
-            o.getTransforms().add(new Translate(-160 * SCALE_FACTOR, -100 * SCALE_FACTOR, 0));
-            o.getTransforms().add(new Translate(y * SCALE_FACTOR, 0, -x * SCALE_FACTOR));
-            o.setMaterial(new PhongMaterial(c));
-            universe.getChildren().add(o);
-        });
-    }
-
-    public void addBox(double x, double y, Color c) {
-        Platform.runLater(() -> {
-            var o = new Box(30 * SCALE_FACTOR, 30 * SCALE_FACTOR, 30 * SCALE_FACTOR);
-            o.getTransforms().add(new Translate(-160 * SCALE_FACTOR, -15 * SCALE_FACTOR, 0));
-            o.getTransforms().add(new Translate(y * SCALE_FACTOR, 0, -x * SCALE_FACTOR));
-            o.setMaterial(new PhongMaterial(c));
-            universe.getChildren().add(o);
-        });
-    }
-
-    public void addBall(double x, double y, Color c) {
-        Platform.runLater(() -> {
-            var o = new Sphere(15*SCALE_FACTOR);
-            o.getTransforms().add(new Translate(-160 * SCALE_FACTOR, -15 * SCALE_FACTOR, 0));
-            o.getTransforms().add(new Translate(y * SCALE_FACTOR, 0, -x * SCALE_FACTOR));
-            o.setMaterial(new PhongMaterial(c));
-            universe.getChildren().add(o);
+            obstacles.add(o);
+            uobstacles.getChildren().add(o.getNode());
         });
     }
 }
