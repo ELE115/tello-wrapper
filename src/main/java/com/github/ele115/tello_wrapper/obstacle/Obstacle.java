@@ -37,7 +37,6 @@ public abstract class Obstacle implements IObstacle {
 
     @Override
     public void clear() {
-        m.setDiffuseColor(c);
         m.setSpecularPower(Double.MAX_VALUE);
     }
 

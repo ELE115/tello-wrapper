@@ -20,6 +20,14 @@ dependencies {
     implementation 'com.github.b1f6c1c4:mac-to-ip:1.0.0'
 }
 
+sourceSets {
+    main {
+        resources {
+            srcDirs "src/main/resources"
+        }
+    }
+}
+
 javafx {
     version = "11"
     modules = [ 'javafx.controls', 'javafx.swing' ]
