@@ -16,15 +16,15 @@ public class ObstacleWall extends Obstacle {
         switch (dir) {
             case 0: // z < v
             case 1: // z > v
-                ((Box) o).setWidth(500);
+                ((Box) o).setWidth(680);
                 ((Box) o).setHeight(0.1);
-                ((Box) o).setDepth(500);
+                ((Box) o).setDepth(660);
                 o.getTransforms().add(new Translate(shift, -v, 0));
                 ((PhongMaterial) o.getMaterial()).setDiffuseMap(new Image("/htree.png"));
                 break;
             case 2: // x < v
             case 3: // x > v
-                ((Box) o).setWidth(500);
+                ((Box) o).setWidth(680);
                 ((Box) o).setHeight(200);
                 ((Box) o).setDepth(0.1);
                 o.getTransforms().add(new Translate(shift, -100, -v));
@@ -33,7 +33,7 @@ public class ObstacleWall extends Obstacle {
             case 5: // y > v
                 ((Box) o).setWidth(0.1);
                 ((Box) o).setHeight(200);
-                ((Box) o).setDepth(500);
+                ((Box) o).setDepth(680);
                 o.getTransforms().add(new Translate(shift + v, -100, 0));
                 break;
             default:

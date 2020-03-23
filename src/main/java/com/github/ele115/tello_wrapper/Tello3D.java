@@ -74,6 +74,7 @@ public class Tello3D extends Application {
     }
 
     private final static double SCALE_FACTOR = 1.9; // pixels / cm
+    private final static double SHIFT = 170;
     private Group universe, uobstacles;
 
     private class Drone {
@@ -140,7 +141,7 @@ public class Tello3D extends Application {
             droneYRotate = new Rotate(0, Rotate.Y_AXIS);
             droneZRotate = new Rotate(0, Rotate.Z_AXIS);
             droneTranslate = new Translate(0, 0, 0);
-            drone.getTransforms().add(new Translate(-160 * SCALE_FACTOR, -1.25 * SCALE_FACTOR, 0));
+            drone.getTransforms().add(new Translate(-SHIFT * SCALE_FACTOR, -1.25 * SCALE_FACTOR, 0));
             drone.getTransforms().add(droneTranslate);
             drone.getTransforms().add(droneYRotate);
             drone.getTransforms().add(droneZRotate);
@@ -192,12 +193,12 @@ public class Tello3D extends Application {
         universe = new Group();
         uobstacles = new Group();
         uobstacles.getTransforms().add(new Scale(SCALE_FACTOR, SCALE_FACTOR, SCALE_FACTOR));
-        uobstacles.getTransforms().add(new Translate(-160, 0, 0));
+        uobstacles.getTransforms().add(new Translate(-SHIFT, 0, 0));
         universe.getChildren().add(uobstacles);
-        addObstacle(new ObstacleWall(-0.1, 0, 160, Color.DARKGRAY)); // Floor
-        addObstacle(new ObstacleWall(250, 5, 160, Color.LIGHTBLUE)); // Front
-        addObstacle(new ObstacleWall(-250, 4, 160, Color.RED)); // Back
-        addObstacle(new ObstacleWall(-250, 2, 160, Color.PINK)); // Left
+        addObstacle(new ObstacleWall(-0.1, 0, SHIFT, Color.DARKGRAY)); // Floor
+        addObstacle(new ObstacleWall(340, 5, SHIFT, Color.LIGHTBLUE)); // Front
+        addObstacle(new ObstacleWall(-340, 4, SHIFT, Color.RED)); // Back
+        addObstacle(new ObstacleWall(-340, 2, SHIFT, Color.PINK)); // Left
 
         // The main window
         var mainCamera = new PerspectiveCamera();
