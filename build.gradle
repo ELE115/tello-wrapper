@@ -1,8 +1,7 @@
 plugins {
-    id 'java-library'
-    id 'com.jfrog.bintray' version '1.8.4'
+    id 'java'
     id 'org.openjfx.javafxplugin' version '0.0.8'
-    id 'maven-publish'
+    id 'application'
 }
 
 repositories {
@@ -14,6 +13,8 @@ version = '2.4.0'
 
 sourceCompatibility = 1.11
 targetCompatibility = 1.11
+
+mainClassName = 'Main'
 
 dependencies {
     implementation 'org.bytedeco:javacv-platform:1.5.2'
@@ -33,85 +34,6 @@ javafx {
     modules = [ 'javafx.controls', 'javafx.swing' ]
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-javadoc.failOnError = false
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
-
-def pomConfig = {
-    licenses {
-        license {
-            name 'Apache License, Version 2.0'
-            url 'https://www.apache.org/licenses/LICENSE-2.0.txt'
-            distribution 'repo'
-        }
-    }
-
-    developers {
-        developer {
-            id 'b1f6c1c4'
-            url 'https://github.com/b1f6c1c4'
-            name 'Jinzheng Tu'
-            email 'b1f6c1c4@gmail.com'
-        }
-    }
-
-    scm {
-        url 'https://github.com/ELE115/tello-wrapper'
-    }
-}
-
-publishing {
-    publications {
-        mavenPublication(MavenPublication) {
-            from components.java
-            artifact sourcesJar {
-                classifier 'sources'
-            }
-            artifact javadocJar {
-                classifier 'javadoc'
-            }
-            groupId 'com.github.ele115'
-            artifactId 'tello-wrapper'
-            version project.version
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('description', 'Library to connect to a ryze tello drone (sdk commands, state updates, video stream)')
-                root.appendNode('name', 'tello-wrapper')
-                root.appendNode('url', 'https://github.com/ele115/tello-wrapper')
-                root.children().last() + pomConfig
-            }
-        }
-    }
-}
-
-bintray {
-    user = project.findProperty('bintray.user')
-    key = project.findProperty('bintray.key')
-    publications = ['mavenPublication']
-    publish = true
-
-    pkg {
-        repo = 'maven'
-        name = 'tello-wrapper'
-        userOrg = 'ele115'
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/ELE115/tello-wrapper.git'
-        labels = ['tello-drone', 'ryze-tello-drone', 'tello', 'tello-sdk']
-        publicDownloadNumbers = true
-        version {
-            name = project.version
-        }
-    }
+run {
+    standardInput = System.in
 }
