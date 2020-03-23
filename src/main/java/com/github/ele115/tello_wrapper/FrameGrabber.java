@@ -4,9 +4,9 @@ import com.github.ele115.tello_wrapper.tello4j.api.video.TelloVideoFrame;
 import com.github.ele115.tello_wrapper.tello4j.api.video.VideoListener;
 import com.github.ele115.tello_wrapper.tello4j.api.video.VideoWindow;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-import java.awt.Color;
 import java.awt.image.WritableRaster;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -61,6 +61,7 @@ public class FrameGrabber implements VideoListener {
 
     /**
      * Get image pixels
+     *
      * @param frameNumber which frame
      * @return a three dimensional array where the first two indices are the the x location and y location
      * the third is the color chanel R, G, B where R is index zero, G is index 1 and R is index 2
@@ -81,8 +82,9 @@ public class FrameGrabber implements VideoListener {
 
     /**
      * Set image pixels
+     *
      * @param frameNumber which frame
-     * @param theImage the three dimensional array you've modified
+     * @param theImage    the three dimensional array you've modified
      */
     public void setImageArray(int frameNumber, int[][][] theImage) {
         BufferedImage tempBufferedImage = new BufferedImage(theImage.length, theImage[0].length, BufferedImage.TYPE_INT_RGB);

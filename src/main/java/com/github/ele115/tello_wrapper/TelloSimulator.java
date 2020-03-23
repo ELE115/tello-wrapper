@@ -167,32 +167,32 @@ class TelloSimulator implements ITelloDrone {
                 break;
             case FORWARD:
                 for (var i = 0; i < 100; i++) {
-                    micro.rX += Math.cos(micro.rAngle / 180 * Math.PI) * cm / 100;
-                    micro.rY += Math.sin(micro.rAngle / 180 * Math.PI) * cm / 100;
+                    micro.rX += Math.cos(Math.toRadians(micro.rAngle)) * cm / 100;
+                    micro.rY += Math.sin(Math.toRadians(micro.rAngle)) * cm / 100;
                     updateState();
                     sleep(2000 / speed);
                 }
                 break;
             case BACKWARD:
                 for (var i = 0; i < 100; i++) {
-                    micro.rX -= Math.cos(micro.rAngle / 180 * Math.PI) * cm / 100;
-                    micro.rY -= Math.sin(micro.rAngle / 180 * Math.PI) * cm / 100;
+                    micro.rX -= Math.cos(Math.toRadians(micro.rAngle)) * cm / 100;
+                    micro.rY -= Math.sin(Math.toRadians(micro.rAngle)) * cm / 100;
                     updateState();
                     sleep(2000 / speed);
                 }
                 break;
             case LEFT:
                 for (var i = 0; i < 100; i++) {
-                    micro.rX -= Math.sin(micro.rAngle / 180 * Math.PI) * cm / 100;
-                    micro.rY += Math.cos(micro.rAngle / 180 * Math.PI) * cm / 100;
+                    micro.rX -= Math.sin(Math.toRadians(micro.rAngle)) * cm / 100;
+                    micro.rY += Math.cos(Math.toRadians(micro.rAngle)) * cm / 100;
                     updateState();
                     sleep(2000 / speed);
                 }
                 break;
             case RIGHT:
                 for (var i = 0; i < 100; i++) {
-                    micro.rX += Math.sin(micro.rAngle / 180 * Math.PI) * cm / 100;
-                    micro.rY -= Math.cos(micro.rAngle / 180 * Math.PI) * cm / 100;
+                    micro.rX += Math.sin(Math.toRadians(micro.rAngle)) * cm / 100;
+                    micro.rY -= Math.cos(Math.toRadians(micro.rAngle)) * cm / 100;
                     updateState();
                     sleep(2000 / speed);
                 }
@@ -210,14 +210,14 @@ class TelloSimulator implements ITelloDrone {
                 for (var i = 0; i < 100; i++) {
                     micro.rAngle += degrees / 100.0;
                     updateState();
-                    sleep(2000 / speed);
+                    sleep(20);
                 }
                 break;
             case RIGHT:
                 for (var i = 0; i < 100; i++) {
                     micro.rAngle -= degrees / 100.0;
                     updateState();
-                    sleep(2000 / speed);
+                    sleep(20);
                 }
                 break;
         }
@@ -232,8 +232,8 @@ class TelloSimulator implements ITelloDrone {
         switch (direction) {
             case LEFT:
                 for (var i = 0; i < 100; i++) {
-                    micro.rX -= Math.sin(micro.rAngle / 180 * Math.PI) * 35 / 100;
-                    micro.rY += Math.cos(micro.rAngle / 180 * Math.PI) * 35 / 100;
+                    micro.rX -= Math.sin(Math.toRadians(micro.rAngle)) * 35 / 100;
+                    micro.rY += Math.cos(Math.toRadians(micro.rAngle)) * 35 / 100;
                     micro.roll -= 360.0 / 100;
                     micro.rZ = z + 25 * (1 - 4 * (i - 50) * (i - 50) / 100.0 / 100.0);
                     updateState();
@@ -242,8 +242,8 @@ class TelloSimulator implements ITelloDrone {
                 break;
             case RIGHT:
                 for (var i = 0; i < 100; i++) {
-                    micro.rX += Math.sin(micro.rAngle / 180 * Math.PI) * 35 / 100;
-                    micro.rY -= Math.cos(micro.rAngle / 180 * Math.PI) * 35 / 100;
+                    micro.rX += Math.sin(Math.toRadians(micro.rAngle)) * 35 / 100;
+                    micro.rY -= Math.cos(Math.toRadians(micro.rAngle)) * 35 / 100;
                     micro.roll += 360.0 / 100;
                     micro.rZ = z + 25 * (1 - 4 * (i - 50) * (i - 50) / 100.0 / 100.0);
                     updateState();
@@ -252,8 +252,8 @@ class TelloSimulator implements ITelloDrone {
                 break;
             case FORWARD:
                 for (var i = 0; i < 100; i++) {
-                    micro.rX += Math.cos(micro.rAngle / 180 * Math.PI) * 35 / 100;
-                    micro.rY += Math.sin(micro.rAngle / 180 * Math.PI) * 35 / 100;
+                    micro.rX += Math.cos(Math.toRadians(micro.rAngle)) * 35 / 100;
+                    micro.rY += Math.sin(Math.toRadians(micro.rAngle)) * 35 / 100;
                     micro.pitch -= 360.0 / 100;
                     micro.rZ = z + 25 * (1 - 4 * (i - 50) * (i - 50) / 100.0 / 100.0);
                     updateState();
@@ -262,8 +262,8 @@ class TelloSimulator implements ITelloDrone {
                 break;
             case BACKWARD:
                 for (var i = 0; i < 100; i++) {
-                    micro.rX -= Math.cos(micro.rAngle / 180 * Math.PI) * 35 / 100;
-                    micro.rY -= Math.sin(micro.rAngle / 180 * Math.PI) * 35 / 100;
+                    micro.rX -= Math.cos(Math.toRadians(micro.rAngle)) * 35 / 100;
+                    micro.rY -= Math.sin(Math.toRadians(micro.rAngle)) * 35 / 100;
                     micro.pitch += 360.0 / 100;
                     micro.rZ = z + 25 * (1 - 4 * (i - 50) * (i - 50) / 100.0 / 100.0);
                     updateState();
@@ -281,10 +281,11 @@ class TelloSimulator implements ITelloDrone {
         if (micro.rZ == 0)
             throw new RuntimeException("Not taken off yet");
         for (var i = 0; i < 100; i++) {
-            micro.rX += (-Math.sin(micro.rAngle / 180 * Math.PI) * y + Math.cos(micro.rAngle / 180 * Math.PI) * x) / 100;
-            micro.rY += (Math.cos(micro.rAngle / 180 * Math.PI) * y + Math.sin(micro.rAngle / 180 * Math.PI) * x) / 100;
+            micro.rX += (Math.sin(Math.toRadians(micro.rAngle)) * x + Math.cos(Math.toRadians(micro.rAngle)) * y) / 100;
+            micro.rY += (-Math.cos(Math.toRadians(micro.rAngle)) * x + Math.sin(Math.toRadians(micro.rAngle)) * y) / 100;
             micro.rZ += z / 100.0;
             updateState();
+            sleep(2000 / speed);
         }
     }
 
@@ -293,10 +294,11 @@ class TelloSimulator implements ITelloDrone {
         if (micro.rZ == 0)
             throw new RuntimeException("Not taken off yet");
         for (var i = 0; i < 100; i++) {
-            micro.rX += (-Math.sin(micro.rAngle / 180 * Math.PI) * y2 + Math.cos(micro.rAngle / 180 * Math.PI) * x2) / 100;
-            micro.rY += (Math.cos(micro.rAngle / 180 * Math.PI) * y2 + Math.sin(micro.rAngle / 180 * Math.PI) * x2) / 100;
+            micro.rX += (Math.sin(Math.toRadians(micro.rAngle)) * x2 + Math.cos(Math.toRadians(micro.rAngle)) * y2) / 100;
+            micro.rY += (-Math.cos(Math.toRadians(micro.rAngle)) * x2 + Math.sin(Math.toRadians(micro.rAngle)) * y2) / 100;
             micro.rZ += z2 / 100.0;
             updateState();
+            sleep(2000 / speed);
         }
     }
 

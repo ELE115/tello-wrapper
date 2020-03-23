@@ -17,7 +17,6 @@
 package com.github.ele115.tello_wrapper.tello4j.wifi.model.command;
 
 import com.github.ele115.tello_wrapper.tello4j.api.exception.*;
-import com.github.ele115.tello_wrapper.tello4j.api.state.TelloDroneState;
 import com.github.ele115.tello_wrapper.tello4j.wifi.model.response.TelloResponse;
 
 public abstract class TelloCommand {

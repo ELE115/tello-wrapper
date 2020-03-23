@@ -23,7 +23,6 @@ import com.github.ele115.tello_wrapper.tello4j.api.state.TelloDroneState;
 import com.github.ele115.tello_wrapper.tello4j.wifi.impl.network.TelloCommandConnection;
 import com.github.ele115.tello_wrapper.tello4j.wifi.model.TelloSDKValues;
 
-import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
