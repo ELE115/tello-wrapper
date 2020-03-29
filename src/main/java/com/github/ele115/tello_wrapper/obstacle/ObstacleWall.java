@@ -16,7 +16,7 @@ public class ObstacleWall extends Obstacle {
         switch (dir) {
             case 0: // z < v
             case 1: // z > v
-                ((Box) o).setWidth(680);
+                ((Box) o).setWidth(1500);
                 ((Box) o).setHeight(0.1);
                 ((Box) o).setDepth(660);
                 o.getTransforms().add(new Translate(shift, -v, 0));
