@@ -10,6 +10,7 @@ import javafx.scene.paint.Color;
 
 import java.awt.image.BufferedImage;
 import java.util.Scanner;
+
 import GateDetector.GateDetector;
 
 enum FrameObstacleState {
@@ -103,15 +104,37 @@ public class Main {
                     frameGrabber.displayImage(img, 0);
                     break;
                 case "detect":
-                    frameGrabber.recordAndDisplay();
-                    img = frameGrabber.getImage(0);
-                    gateDetector.setImage(img);
-                    gateDetector.applyFilter();
-                    gateDetector.detectAllEdges();
-                    System.out.println("Horizontal Direction: " + gateDetector.horizontalMoveDirection());
-                    System.out.println("Vertical Direction: " + gateDetector.verticalMoveDirection());
-                    img = gateDetector.getEdgeImage();
-                    frameGrabber.displayImage(img, 0);
+                    String horizontalMove, verticalMove;
+                    do {
+                        frameGrabber.recordAndDisplay();
+                        img = frameGrabber.getImage(0);
+                        gateDetector.setImage(img);
+                        gateDetector.applyFilter();
+                        gateDetector.detectAllEdges();
+                        horizontalMove = gateDetector.horizontalMoveDirection();
+                        verticalMove = gateDetector.verticalMoveDirection();
+                        System.out.println("Horizontal Direction: " + horizontalMove);
+                        System.out.println("Vertical Direction: " + verticalMove);
+                        img = gateDetector.getEdgeImage();
+                        frameGrabber.displayImage(img, 0);
+
+
+                        if (horizontalMove.equals("left")) {
+                            System.out.println("Adjustment: left");
+                            drone.left(10);
+                        } else if (horizontalMove.equals("right")) {
+                            System.out.println("Adjustment: right");
+                            drone.right(10);
+                        }
+
+                        if (verticalMove.equals("up")) {
+                            System.out.println("Adjustment: up");
+                            drone.up(10);
+                        } else if (verticalMove.equals("down")) {
+                            System.out.println("Adjustment: down");
+                            drone.down(10);
+                        }
+                    } while (!horizontalMove.equals("good") || !verticalMove.equals("good"));
                     break;
                 default:
                     System.err.println("Wrong command. Try again!");

@@ -42,10 +42,27 @@ public class GateDetector {
 
     private BufferedImage getImageFromArray(int[][] a) {
         Color c;
+        int midWidthMin = (int)((1-alignmentError)*frameWidth/2);
+        int midWidthMax = (int)((1+alignmentError)*frameWidth/2);
+        int midHeightMin = (int)((1-alignmentError)*frameHeight/2);
+        int midHeightMax = (int)((1+alignmentError)*frameHeight/2);
+        int gateMidWidthMin = getMidX() - 5;
+        int gateMidWidthMax = getMidX() + 5;
+        int gateMidHeightMin = getMidY() - 5;
+        int gateMidHeightMax = getMidY() + 5;
+
+        System.out.println("Min: " + midWidthMin + " Max: " + midWidthMax);
         BufferedImage img = new BufferedImage(frameWidth, frameHeight, BufferedImage.TYPE_INT_RGB);
         for (int i = 0; i < frameHeight; i++) {
             for (int j = 0; j < frameWidth; j++) {
-                c = a[i][j] == 1 ? Color.BLACK : Color.WHITE;
+                if (a[i][j] == 1)
+                    c = Color.BLACK;
+                else if (j >= gateMidWidthMin && j <= gateMidWidthMax && i >= gateMidHeightMin && i <= gateMidHeightMax)
+                    c = Color.RED;
+                else if (j >= midWidthMin && j <= midWidthMax && i >= midHeightMin && i <= midHeightMax)
+                    c = Color.YELLOW;
+                else
+                    c = Color.WHITE;
                 img.setRGB(j, i, c.getRGB());
             }
         }
@@ -73,10 +90,10 @@ public class GateDetector {
 
         gateMid = (getEdgeStart("left") + getEdgeStart("right")) / 2;
         frameMid = frameWidth / 2;
-        if (gateMid < 0.9*frameMid) {
+        if (gateMid < (1-alignmentError)*frameMid) {
             return "left";
         }
-        else if (gateMid > 1.1*frameMid){
+        else if (gateMid > (1+alignmentError)*frameMid){
             return "right";
         }
         else {
@@ -89,10 +106,10 @@ public class GateDetector {
 
         gateMid = (getEdgeStart("upper") + getEdgeStart("bottom")) / 2;
         frameMid = frameHeight / 2;
-        if (gateMid < 0.9*frameMid) {
+        if (gateMid < (1-alignmentError)*frameMid) {
             return "up";
         }
-        else if (gateMid > 1.1*frameMid){
+        else if (gateMid > (1+alignmentError)*frameMid){
             return "down";
         }
         else {
@@ -163,5 +180,13 @@ public class GateDetector {
         }
 
         return edgeTotal / edgeCnt;
+    }
+
+    private int getMidX() {
+        return (leftEdge + rightEdge) / 2;
+    }
+
+    private int getMidY() {
+        return (upperEdge + bottomEdge) / 2;
     }
 }
