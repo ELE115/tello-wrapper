@@ -10,6 +10,7 @@ import javafx.scene.paint.Color;
 
 import java.awt.image.BufferedImage;
 import java.util.Scanner;
+import GateDetector.GateDetector;
 
 enum FrameObstacleState {
     BEFORE_FIRST, FIRST_BORDER, MIDDLE, SECOND_BORDER, AFTER_SECOND;
@@ -57,6 +58,8 @@ public class Main {
         String cmd;
         int distance;
         BufferedImage[] imgs;
+        BufferedImage img;
+        GateDetector gateDetector = new GateDetector();
 
         while (true) {
             System.out.print("> ");
@@ -92,21 +95,23 @@ public class Main {
                 case "snap":
                     frameGrabber.recordAndDisplay();
                     break;
-                case "applyfilter":
-                    imgs = frameGrabber.getImages();
-                    for (var img : imgs) {
-                        applyFilter(img);
-                    }
-                    frameGrabber.displayImages(imgs);
+                case "filter":
+                    img = frameGrabber.getImage(0);
+                    gateDetector.setImage(img);
+                    gateDetector.applyFilter();
+                    img = gateDetector.getFilteredFrameImage();
+                    frameGrabber.displayImage(img, 0);
                     break;
                 case "detect":
                     frameGrabber.recordAndDisplay();
-                    imgs = frameGrabber.getImages();
-                    for (var img : imgs) {
-                        applyFilter(img);
-                        markObstacleEdges(img);
-                    }
-                    frameGrabber.displayImages(imgs);
+                    img = frameGrabber.getImage(0);
+                    gateDetector.setImage(img);
+                    gateDetector.applyFilter();
+                    gateDetector.detectAllEdges();
+                    System.out.println("Horizontal Direction: " + gateDetector.horizontalMoveDirection());
+                    System.out.println("Vertical Direction: " + gateDetector.verticalMoveDirection());
+                    img = gateDetector.getEdgeImage();
+                    frameGrabber.displayImage(img, 0);
                     break;
                 default:
                     System.err.println("Wrong command. Try again!");
@@ -115,107 +120,5 @@ public class Main {
         }
     }
 
-    public static void applyFilter(BufferedImage img) {
-        java.awt.Color c;
-        int r, g, b;
-        for (int i = 0; i < img.getWidth(); i++) {
-            for (int j = 0; j < img.getHeight(); j++) {
-                c = new java.awt.Color(img.getRGB(i, j));
-                r = c.getRed() > 100 ? 255 : 0;
-                g = 0;
-                b = 0;
-                img.setRGB(i, j, new java.awt.Color(r, g, b).getRGB());
-            }
-        }
-    }
-
-    public static void markObstacleEdges(BufferedImage img) {
-        int avgWinSize = 8;
-        int val;
-        double upperThreshVal = 255 * 0.8;
-        java.awt.Color c;
-        int leftBorderTotal, leftBorderCnt;
-        int rightBorderTotal, rightBorderCnt;
-
-        leftBorderTotal = leftBorderCnt = 0;
-        rightBorderTotal = rightBorderCnt = 0;
-        System.out.println("Height: " + img.getHeight() + " Width: " + img.getWidth());
-        for (int i = 0; i < img.getHeight(); i++) {
-            // detect left border
-            RunningAverage leftBorderAvg = new RunningAverage(avgWinSize);
-            for (int j = 0; j < img.getWidth() - avgWinSize; j++) {
-                c = new java.awt.Color(img.getRGB(j, i));
-                val = c.getRed();
-                leftBorderAvg.addValue(val);
-                if (leftBorderAvg.isFilled()) {
-                    if (leftBorderAvg.getAverage() > upperThreshVal) {
-                        leftBorderTotal += j;
-                        leftBorderCnt++;
-                        img.setRGB(j, i, new java.awt.Color(0, 255, 0).getRGB());
-                        break;
-                    }
-                }
-            }
-            // detect right border
-            RunningAverage rightBorderAvg = new RunningAverage(avgWinSize);
-            for (int j = img.getWidth() - 1; j > avgWinSize; j--) {
-                c = new java.awt.Color(img.getRGB(j, i));
-                val = c.getRed();
-                rightBorderAvg.addValue(val);
-                if (rightBorderAvg.isFilled()) {
-                    if (rightBorderAvg.getAverage() > upperThreshVal) {
-                        rightBorderTotal += j;
-                        rightBorderCnt++;
-                        img.setRGB(j, i, new java.awt.Color(0, 255, 0).getRGB());
-                        break;
-                    }
-                }
-            }
-        }
-
-        int leftBorder = leftBorderTotal / leftBorderCnt;
-        int rightBorder = rightBorderTotal / rightBorderCnt;
-        System.out.println("Left border: " + leftBorder + " Right Border: " + rightBorder);
-        int xMiddle = (leftBorder + rightBorder) / 2;
-        if (xMiddle < img.getWidth()/2) {
-            System.out.println("Has to move left");
-        } else {
-            System.out.println("Has to move right");
-        }
-    }
-}
-
-class RunningAverage {
-    private int size;
-    private int[] wnd;
-    private int wrIndex;
-    private int sum;
-    private int validCnt;
-
-    public RunningAverage(int size) {
-        this.size = size;
-        wrIndex = 0;
-        wnd = new int[size];
-        validCnt = 0;
-    }
-
-    public void addValue(int val) {
-        if (validCnt < size) {
-            validCnt++;
-            sum += val;
-        } else {
-            sum = sum - wnd[wrIndex] + val;
-        }
-        wnd[wrIndex] = val;
-        wrIndex = wrIndex == (size - 1) ? 0 : wrIndex + 1;
-    }
-
-    public boolean isFilled() {
-        return validCnt >= size;
-    }
-
-    public double getAverage() {
-        return ((double) sum) / size;
-    }
 
 }
