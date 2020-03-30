@@ -9,15 +9,17 @@ public class GateDetector {
     private int[][] gateEdges;
     private int frameWidth;
     private int frameHeight;
-    private static int CHANNEL_THRES = 160;
+    private static int channelThres;
     private int leftEdge;
     private int rightEdge;
     private int upperEdge;
     private int bottomEdge;
-    private double alignmentError = 0.05;
+    private double alignmentError;
 
 
-    public GateDetector() {
+    public GateDetector(int channelThres, double alignmentErrorFrac) {
+        this.channelThres = channelThres;
+        this.alignmentError = alignmentErrorFrac;
     }
 
     public void setImage(BufferedImage frame) {
@@ -34,7 +36,7 @@ public class GateDetector {
         for (int i = 0; i < frameWidth; i++) {
             for (int j = 0; j < frameHeight; j++) {
                 c = new java.awt.Color(frame.getRGB(i, j));
-                val = c.getRed() > CHANNEL_THRES ? 1 : 0;
+                val = c.getRed() > channelThres ? 1 : 0;
                 frameFiltered[j][i] = val;
             }
         }

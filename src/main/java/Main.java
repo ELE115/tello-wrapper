@@ -13,47 +13,68 @@ import java.util.Scanner;
 
 import GateDetector.GateDetector;
 
-enum FrameObstacleState {
-    BEFORE_FIRST, FIRST_BORDER, MIDDLE, SECOND_BORDER, AFTER_SECOND;
-}
-
-enum BorderValue {
-    LEFT, UPPER, RIGHT, BOTTOM;
-}
-
 public class Main {
-    private static double droneX = 0;
-    private static double droneY = -400;
-    private static int droneZ = 100;
-
     public static void main(String[] args) {
+        if (args.length != 3) {
+            System.err.println("Required three arguments: x y z");
+            System.exit(1);
+        }
+        double droneX = Double.parseDouble(args[0]);
+        double droneY = Double.parseDouble(args[1]);
+        double droneZ = Double.parseDouble(args[2]);
+
         Tello.setWindowSize(960, 720);
-//        Tello.getSimulator().addObstacle(new ObstacleCylinder(150, 200, Color.AQUA));
-//        Tello.getSimulator().addObstacle(new ObstacleCylinder(0, 150, Color.ORANGE));
-//        Tello.getSimulator().addObstacle(new ObstacleBox(0, 0, 30, Color.LIGHTBLUE));
-//        Tello.getSimulator().addObstacle(new ObstacleBall(0, 30, 0, Color.RED));
         Tello.getSimulator().addObstacle(new ObstacleGate(0, 0, 50, 20, Color.RED));
-//        Tello.getSimulator().addObstacle(new ObstacleGate(100, 400, 0, 0, Color.GREEN));
-//        Tello.getSimulator().addObstacle(new ObstacleGate(0, 800, 0, 40, Color.RED));
         var d1 = Tello.Connect("simulator", droneX, droneY, 90);
-//        var d2 = Tello.Connect("simulator", 0, 0, 90);
         d1.addVideoListener(new VideoWindow());
         FrameGrabber frameGrabber = new FrameGrabber(1);
         d1.addVideoListener(frameGrabber);
-//        d2.addVideoListener(new VideoWindow());
         d1.setStreaming(true);
-//        d2.setStreaming(true);
         d1.takeoff();
-        d1.up(droneZ);
-//        d2.takeoff();
-        interactiveControl(d1, frameGrabber);
+        d1.up((int)(droneZ-50));
 
+        // Fly through a gate
+        alignGateAndFrameCenters(d1, frameGrabber);
+        d1.forward((int)(-droneY+100));
 
-//        d2.forward(300);
         d1.land();
-//        d2.land();
-
         System.exit(0);
+    }
+
+    public static void alignGateAndFrameCenters(ITelloDrone drone, FrameGrabber frameGrabber) {
+        int adjustmentDistance = 10;
+        BufferedImage img;
+        GateDetector gateDetector = new GateDetector(160, 0.05);
+        String horizontalMove, verticalMove;
+        do {
+            frameGrabber.recordAndDisplay();
+            img = frameGrabber.getImage(0);
+            gateDetector.setImage(img);
+            gateDetector.applyFilter();
+            gateDetector.detectAllEdges();
+            horizontalMove = gateDetector.horizontalMoveDirection();
+            verticalMove = gateDetector.verticalMoveDirection();
+            System.out.println("Horizontal Direction: " + horizontalMove);
+            System.out.println("Vertical Direction: " + verticalMove);
+            img = gateDetector.getEdgeImage();
+            frameGrabber.displayImage(img, 0);
+
+            if (horizontalMove.equals("left")) {
+                System.out.println("Adjustment: left " + adjustmentDistance);
+                drone.left(adjustmentDistance);
+            } else if (horizontalMove.equals("right")) {
+                System.out.println("Adjustment: right" + adjustmentDistance);
+                drone.right(adjustmentDistance);
+            }
+
+            if (verticalMove.equals("up")) {
+                System.out.println("Adjustment: up " + adjustmentDistance);
+                drone.up(adjustmentDistance);
+            } else if (verticalMove.equals("down")) {
+                System.out.println("Adjustment: down" + adjustmentDistance);
+                drone.down(adjustmentDistance);
+            }
+        } while (!horizontalMove.equals("good") || !verticalMove.equals("good"));
     }
 
     public static void interactiveControl(ITelloDrone drone, FrameGrabber frameGrabber) {
@@ -62,7 +83,7 @@ public class Main {
         int distance;
         BufferedImage[] imgs;
         BufferedImage img;
-        GateDetector gateDetector = new GateDetector();
+        GateDetector gateDetector = new GateDetector(160, 0.05);
 
         while (true) {
             System.out.print("> ");
@@ -73,7 +94,6 @@ public class Main {
                 case "left":
                     distance = kb.nextInt();
                     drone.left(distance);
-                    droneX -= distance;
                     break;
                 case "right":
                     distance = kb.nextInt();
@@ -112,6 +132,8 @@ public class Main {
                         img = frameGrabber.getImage(0);
                         gateDetector.setImage(img);
                         gateDetector.applyFilter();
+//                        img = gateDetector.getFilteredFrameImage();
+//                        frameGrabber.displayImage(img, 0);
                         gateDetector.detectAllEdges();
                         horizontalMove = gateDetector.horizontalMoveDirection();
                         verticalMove = gateDetector.verticalMoveDirection();
@@ -136,6 +158,7 @@ public class Main {
                             System.out.println("Adjustment: down");
                             drone.down(10);
                         }
+//                    } while (false);
                     } while (!horizontalMove.equals("good") || !verticalMove.equals("good"));
                     break;
                 default:
@@ -144,10 +167,5 @@ public class Main {
             }
         }
     }
-
-    public static void printDroneLocation() {
-        System.out.println("Drone X: " + droneX + " Drone Y: " + droneY);
-    }
-
 
 }
