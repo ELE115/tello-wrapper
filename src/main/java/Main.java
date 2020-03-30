@@ -3,10 +3,17 @@ import com.github.ele115.tello_wrapper.FrameGrabber;
 import com.github.ele115.tello_wrapper.ITelloDrone;
 import com.github.ele115.tello_wrapper.Tello;
 import com.github.ele115.tello_wrapper.obstacle.ObstacleGate;
+import com.github.ele115.tello_wrapper.tello4j.api.video.TelloVideoFrame;
 import com.github.ele115.tello_wrapper.tello4j.api.video.VideoWindow;
 import javafx.scene.paint.Color;
+import org.bytedeco.javacv.Java2DFrameUtils;
+import org.bytedeco.opencv.opencv_core.*;
 
 import java.awt.image.BufferedImage;
+
+import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.bytedeco.opencv.global.opencv_imgproc.*;
+import static org.bytedeco.opencv.global.opencv_ximgproc.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -20,18 +27,51 @@ public class Main {
 
         Tello.setWindowSize(960, 720);
         Tello.getSimulator().addObstacle(new ObstacleGate(60, 250, 50, 20, Color.RED));
-        Tello.getSimulator().setNoisy(true);
+        // Tello.getSimulator().setNoisy(true);
         var d1 = Tello.Connect("simulator", droneX, droneY, 90);
-        d1.addVideoListener(new VideoWindow());
-        FrameGrabber frameGrabber = new FrameGrabber(1);
-        d1.addVideoListener(frameGrabber);
+        var win = new VideoWindow();
+        d1.addVideoListener((frame) -> {
+            var src = Java2DFrameUtils.toIplImage(frame.getImage());
+            var dst = cvCreateImage(cvGetSize(src), src.depth(), 1);
+            var colorDst = cvCreateImage(cvGetSize(src), src.depth(), 3);
+            var storage = cvCreateMemStorage(0);
+            var lines = new CvSeq();
+
+            cvInRangeS(src, cvScalar(0, 100, 0, 0), cvScalar(255, 255, 155, 155), dst);
+            {
+                var m = new Mat(dst);
+                medianBlur(m, m, 41);
+                // thinning(m, m);
+                dst = new IplImage(m);
+            }
+            // cvCanny(src, dst, 50, 200, 3);
+            cvFloodFill(dst, new CvPoint(0, 0), cvScalar(255));
+            cvCvtColor(dst, colorDst, CV_GRAY2BGR);
+
+            // lines = cvHoughLines2(dst, storage, CV_HOUGH_PROBABILISTIC, 1, Math.PI / 180, 40, 50, 10, 0, CV_PI);
+            // for (int i = 0; i < lines.total(); i++) {
+            //     // Based on JavaCPP, the equivalent of the C code:
+            //     // CvPoint* line = (CvPoint*)cvGetSeqElem(lines,i);
+            //     // CvPoint first=line[0], second=line[1]
+            //     // is:
+            //     var line = cvGetSeqElem(lines, i);
+            //     var pt1 = new CvPoint(line).position(0);
+            //     var pt2 = new CvPoint(line).position(1);
+
+            //     System.out.println("Line spotted: ");
+            //     System.out.println("\t pt1: " + pt1);
+            //     System.out.println("\t pt2: " + pt2);
+            //     cvLine(colorDst, pt1, pt2, CV_RGB(255, 0, 0), 3, CV_AA, 0); // draw the segment on the image
+            // }
+
+            win.onFrameReceived(new TelloVideoFrame(Java2DFrameUtils.toBufferedImage(colorDst), null));
+        });
         d1.setStreaming(true);
         d1.takeoff();
         d1.up(droneZ - 50);
 
         // Fly through a gate
-        alignGateAndFrameCenters(d1, frameGrabber);
-        d1.forward(-droneY + 400);
+        // d1.forward(-droneY + 400);
 
         d1.land();
     }
