@@ -7,10 +7,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Group;
-import javafx.scene.PerspectiveCamera;
-import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
+import javafx.scene.*;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -74,7 +71,11 @@ public class Tello3D extends Application {
     }
 
     void addSimulator(TelloSimulator sim) {
-        Platform.runLater(() -> this.drones.add(new Drone(sim)));
+        Platform.runLater(() -> {
+            var drone = new Drone(sim);
+            this.drones.add(drone);
+            this.addObstacle(drone);
+        });
     }
 
     private int snapshotInt = 50;
@@ -86,9 +87,10 @@ public class Tello3D extends Application {
     private final static double SCALE_FACTOR = 1.9; // pixels / cm
     private final static double SHIFT = 170; // position of drone w.r.t. room center
     private final static double COLLIDE_BOX = 25; // length and width of a drone
+    private final static double COLLIDE_HEIGHT = 10; // height of a drone
     private Group universe, uobstacles;
 
-    private class Drone {
+    private class Drone implements IObstacle {
         private TelloSimulator sim;
         private Translate droneTranslate;
         private Rotate droneXRotate;
@@ -214,6 +216,8 @@ public class Tello3D extends Application {
 
             var flag = false;
             for (var obj : obstacles) {
+                if (obj == this)
+                    continue;
                 if (checkRotated(obj, dx, dy)
                         || checkRotated(obj, dy, dx)
                         || checkRotated(obj, dx, -dy)
@@ -246,6 +250,44 @@ public class Tello3D extends Application {
             }
             var frame = new TelloVideoFrame(snapshot, null);
             this.sim.issueFrame(frame);
+        }
+
+        @Override
+        public boolean check(double x, double y, double z) {
+            var d3x = x - micro.rX;
+            var d3y = y - micro.rY;
+            var d3z = z - micro.rZ;
+
+            var d2x = Math.cos(Math.toRadians(-micro.rAngle)) * d3x - Math.sin(Math.toRadians(-micro.rAngle)) * d3y;
+            var d2y = Math.sin(Math.toRadians(-micro.rAngle)) * d3x + Math.cos(Math.toRadians(-micro.rAngle)) * d3y;
+            var d2z = d3z;
+
+            var d1x = Math.cos(Math.toRadians(-micro.pitch)) * d2x - Math.sin(Math.toRadians(-micro.pitch)) * d2z;
+            var d1y = d2y;
+            var d1z = Math.sin(Math.toRadians(-micro.pitch)) * d2x + Math.cos(Math.toRadians(-micro.pitch)) * d2z;
+
+            var d0x = d1x;
+            var d0y = Math.cos(Math.toRadians(-micro.roll)) * d1y - Math.sin(Math.toRadians(-micro.roll)) * d1z;
+            var d0z = Math.sin(Math.toRadians(-micro.roll)) * d1y + Math.cos(Math.toRadians(-micro.roll)) * d1z;
+
+            return Math.abs(d0x) <= COLLIDE_BOX / 2
+                    && Math.abs(d0y) <= COLLIDE_BOX / 2
+                    && Math.abs(d0z) <= COLLIDE_HEIGHT / 2;
+        }
+
+        @Override
+        public void clear() {
+            // nothing here
+        }
+
+        @Override
+        public Node getNode() {
+            return null;
+        }
+
+        @Override
+        public String toString() {
+            return "another drone";
         }
     }
 
@@ -348,7 +390,9 @@ public class Tello3D extends Application {
     public void addObstacle(IObstacle o) {
         Platform.runLater(() -> {
             obstacles.add(o);
-            uobstacles.getChildren().add(o.getNode());
+            var n = o.getNode();
+            if (n != null)
+                uobstacles.getChildren().add(n);
         });
     }
 }
