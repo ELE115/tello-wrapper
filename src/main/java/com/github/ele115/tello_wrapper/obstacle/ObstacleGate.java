@@ -20,14 +20,14 @@ public class ObstacleGate implements IObstacle {
     private final PhongMaterial m;
     private int state = 0;
 
-    public ObstacleGate(double x, double y, double z, double angle) {
+    public ObstacleGate(double x, double y, double z, double angle, Color color) {
         this.x = x;
         this.y = y;
         this.z = z;
         this.angle = angle;
         this.g = new Group();
         this.m = new PhongMaterial();
-        this.m.setDiffuseMap(new Image("/brick.jpg"));
+        this.m.setDiffuseColor(color);
         this.m.setSpecularColor(Color.DARKRED);
 
         this.g.getTransforms().add(new Translate(y, -GHEIGHT / 2 - z, -x));

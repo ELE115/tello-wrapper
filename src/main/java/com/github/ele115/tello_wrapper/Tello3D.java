@@ -23,9 +23,9 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Tello3D extends Application {
@@ -33,6 +33,7 @@ public class Tello3D extends Application {
     private static final int droneWidth = 960, droneHeight = 720;
     private static int defaultWidth = 960, defaultHeight = 720;
     private boolean delayUpdate = false;
+    private boolean noisy = false;
     private final List<Drone> drones = new ArrayList<>();
     private final List<IObstacle> obstacles = new ArrayList<>();
     private double mousePosX, mousePosY;
@@ -61,6 +62,10 @@ public class Tello3D extends Application {
 
     public void setDelayUpdate(boolean v) {
         delayUpdate = v;
+    }
+
+    public void setNoisy(boolean v) {
+        noisy = v;
     }
 
     void addSimulator(TelloSimulator sim) {
@@ -134,7 +139,7 @@ public class Tello3D extends Application {
 
                 dronePars = new SnapshotParameters();
                 dronePars.setCamera(c);
-                dronePars.setFill(Color.BLACK);
+                dronePars.setFill(Color.LIGHTGRAY);
                 dronePars.setViewport(new Rectangle2D(0, 0, droneWidth, droneHeight));
                 dronePars.setDepthBuffer(true);
             }
@@ -180,9 +185,21 @@ public class Tello3D extends Application {
             }
         }
 
+        private Random rnd = new Random();
+
         private void makeSnapshot() {
             var img = new WritableImage(droneWidth, droneHeight);
-            BufferedImage snapshot = SwingFXUtils.fromFXImage(universe.snapshot(dronePars, img), null);
+            var snapshot = SwingFXUtils.fromFXImage(universe.snapshot(dronePars, img), null);
+            if (noisy) {
+                for (var i = 0; i < snapshot.getWidth(); i++)
+                    for (var j = 0; j < snapshot.getHeight(); j++) {
+                        var rgb = snapshot.getRGB(i, j);
+                        if (rnd.nextDouble() > 0.3)
+                            continue;
+                        rgb = rnd.nextInt();
+                        snapshot.setRGB(i, j, rgb);
+                    }
+            }
             var frame = new TelloVideoFrame(snapshot, null);
             this.sim.issueFrame(frame);
         }
@@ -197,9 +214,9 @@ public class Tello3D extends Application {
         uobstacles.getTransforms().add(new Translate(-SHIFT, 0, 0));
         universe.getChildren().add(uobstacles);
         addObstacle(new ObstacleWall(-0.1, 0, SHIFT, Color.DARKGRAY)); // Floor
-        addObstacle(new ObstacleWall(340, 5, SHIFT, Color.LIGHTBLUE)); // Front
-        addObstacle(new ObstacleWall(-340, 4, SHIFT, Color.RED)); // Back
-        addObstacle(new ObstacleWall(-340, 2, SHIFT, Color.PINK)); // Left
+        addObstacle(new ObstacleWall(340, 5, SHIFT, Color.LIGHTGREEN)); // Front
+        addObstacle(new ObstacleWall(-340, 4, SHIFT, Color.PINK)); // Back
+        addObstacle(new ObstacleWall(-340, 2, SHIFT, Color.LIGHTBLUE)); // Left
 
         // The main window
         var mainCamera = new PerspectiveCamera();
@@ -219,7 +236,7 @@ public class Tello3D extends Application {
         mainCamera.getTransforms().add(mainMoveXY);
 
         var mainScene = new Scene(universe, defaultWidth, defaultHeight, true);
-        mainScene.setFill(Color.BLACK);
+        mainScene.setFill(Color.LIGHTGRAY);
         mainScene.setCamera(mainCamera);
 
         mainScene.setOnScroll((ScrollEvent e) -> {

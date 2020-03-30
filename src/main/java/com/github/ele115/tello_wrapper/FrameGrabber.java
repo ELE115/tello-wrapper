@@ -55,8 +55,28 @@ public class FrameGrabber implements VideoListener {
         this.displayBufferedFrames();
     }
 
+    public void displayImage(BufferedImage image, int i) {
+        this.setImage(image, i);
+        this.displayBufferedFrames();
+    }
+
     public BufferedImage[] getImages() {
         return frameBuffer;
+    }
+
+    public BufferedImage getImage(int i) {
+        if (i >= frameBuffer.length) {
+            System.err.println("Image index must be less than " + frameBuffer.length);
+            return null;
+        }
+        return frameBuffer[i];
+    }
+
+    public void setImage(BufferedImage img, int i) {
+        if (i >= frameBuffer.length) {
+            System.err.println("Image index must be less than " + frameBuffer.length);
+        }
+        frameBuffer[i] = img;
     }
 
     /**
