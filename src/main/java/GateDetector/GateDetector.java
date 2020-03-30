@@ -1,7 +1,7 @@
 package GateDetector;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.Color;
 
 public class GateDetector {
     private BufferedImage frame;
@@ -31,11 +31,11 @@ public class GateDetector {
     }
 
     public void applyFilter() {
-        java.awt.Color c;
+        Color c;
         int val;
         for (int i = 0; i < frameWidth; i++) {
             for (int j = 0; j < frameHeight; j++) {
-                c = new java.awt.Color(frame.getRGB(i, j));
+                c = new Color(frame.getRGB(i, j));
                 val = c.getRed() > channelThres ? 1 : 0;
                 frameFiltered[j][i] = val;
             }
@@ -44,10 +44,10 @@ public class GateDetector {
 
     private BufferedImage getImageFromArray(int[][] a) {
         Color c;
-        int midWidthMin = (int)((1-alignmentError)*frameWidth/2);
-        int midWidthMax = (int)((1+alignmentError)*frameWidth/2);
-        int midHeightMin = (int)((1-alignmentError)*frameHeight/2);
-        int midHeightMax = (int)((1+alignmentError)*frameHeight/2);
+        int midWidthMin = (int) ((1 - alignmentError) * frameWidth / 2);
+        int midWidthMax = (int) ((1 + alignmentError) * frameWidth / 2);
+        int midHeightMin = (int) ((1 - alignmentError) * frameHeight / 2);
+        int midHeightMax = (int) ((1 + alignmentError) * frameHeight / 2);
         int gateMidWidthMin = getMidX() - 5;
         int gateMidWidthMax = getMidX() + 5;
         int gateMidHeightMin = getMidY() - 5;
@@ -92,13 +92,11 @@ public class GateDetector {
 
         gateMid = (getEdgeStart("left") + getEdgeStart("right")) / 2;
         frameMid = frameWidth / 2;
-        if (gateMid < (1-alignmentError)*frameMid) {
+        if (gateMid < (1 - alignmentError) * frameMid) {
             return "left";
-        }
-        else if (gateMid > (1+alignmentError)*frameMid){
+        } else if (gateMid > (1 + alignmentError) * frameMid) {
             return "right";
-        }
-        else {
+        } else {
             return "good";
         }
     }
@@ -108,13 +106,11 @@ public class GateDetector {
 
         gateMid = (getEdgeStart("upper") + getEdgeStart("bottom")) / 2;
         frameMid = frameHeight / 2;
-        if (gateMid < (1-alignmentError)*frameMid) {
+        if (gateMid < (1 - alignmentError) * frameMid) {
             return "up";
-        }
-        else if (gateMid > (1+alignmentError)*frameMid){
+        } else if (gateMid > (1 + alignmentError) * frameMid) {
             return "down";
-        }
-        else {
+        } else {
             return "good";
         }
     }

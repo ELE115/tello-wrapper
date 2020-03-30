@@ -1,17 +1,12 @@
+import GateDetector.GateDetector;
 import com.github.ele115.tello_wrapper.FrameGrabber;
 import com.github.ele115.tello_wrapper.ITelloDrone;
 import com.github.ele115.tello_wrapper.Tello;
-import com.github.ele115.tello_wrapper.obstacle.ObstacleBall;
-import com.github.ele115.tello_wrapper.obstacle.ObstacleBox;
-import com.github.ele115.tello_wrapper.obstacle.ObstacleCylinder;
 import com.github.ele115.tello_wrapper.obstacle.ObstacleGate;
 import com.github.ele115.tello_wrapper.tello4j.api.video.VideoWindow;
 import javafx.scene.paint.Color;
 
 import java.awt.image.BufferedImage;
-import java.util.Scanner;
-
-import GateDetector.GateDetector;
 
 public class Main {
     public static void main(String[] args) {
@@ -31,11 +26,11 @@ public class Main {
         d1.addVideoListener(frameGrabber);
         d1.setStreaming(true);
         d1.takeoff();
-        d1.up(droneZ-50);
+        d1.up(droneZ - 50);
 
         // Fly through a gate
         alignGateAndFrameCenters(d1, frameGrabber);
-        d1.forward(-droneY+400);
+        d1.forward(-droneY + 400);
 
         d1.land();
     }
