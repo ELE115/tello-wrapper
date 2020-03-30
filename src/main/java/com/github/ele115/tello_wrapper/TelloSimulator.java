@@ -152,7 +152,30 @@ class TelloSimulator implements ITelloDrone {
 
     @Override
     public void emergency() {
+        if (micro.rZ <= 0)
+            return;
+
+        var z = micro.rZ;
+        for (var i = 0; micro.rZ > i; i += 3) {
+            micro.rZ -= i;
+            i += 3;
+            updateState();
+            sleep(50);
+        }
+
+        if (z > 30) {
+            for (var i = 0; i < 30; i++) {
+                micro.pitch = 20 * (1 - Math.cos(i * 2 * Math.PI / 30)) / 2;
+                micro.roll = 20 * Math.sin(i * 2 * Math.PI / 30);
+                micro.rZ = 25 * (1 - 4 * (i - 15) * (i - 15) / 30.0 / 30.0);
+                updateState();
+                sleep(20);
+            }
+        }
+
         micro.rZ = 0;
+        micro.roll = 0;
+        micro.pitch = 0;
         updateState();
     }
 
@@ -303,10 +326,25 @@ class TelloSimulator implements ITelloDrone {
     public void curve(int x1, int y1, int z1, int x2, int y2, int z2, int speed) {
         if (micro.rZ == 0)
             throw new RuntimeException("Not taken off yet");
-        for (var i = 0; i < 100; i++) {
-            micro.rX += (-Math.sin(Math.toRadians(micro.rAngle)) * y2 + Math.cos(Math.toRadians(micro.rAngle)) * x2) / 100;
-            micro.rY += (Math.cos(Math.toRadians(micro.rAngle)) * y2 + Math.sin(Math.toRadians(micro.rAngle)) * x2) / 100;
-            micro.rZ += z2 / 100.0;
+
+        var px0 = micro.rX;
+        var py0 = micro.rY;
+        var pz0 = micro.rZ;
+
+        var px1 = px0 - Math.sin(Math.toRadians(micro.rAngle)) * y1 + Math.cos(Math.toRadians(micro.rAngle)) * x1;
+        var py1 = py0 + Math.cos(Math.toRadians(micro.rAngle)) * y1 + Math.sin(Math.toRadians(micro.rAngle)) * x1;
+        var pz1 = pz0 + z1;
+
+        var px2 = px0 - Math.sin(Math.toRadians(micro.rAngle)) * y2 + Math.cos(Math.toRadians(micro.rAngle)) * x2;
+        var py2 = py0 + Math.cos(Math.toRadians(micro.rAngle)) * y2 + Math.sin(Math.toRadians(micro.rAngle)) * x2;
+        var pz2 = pz0 + z2;
+
+        for (var i = 0; i <= 100; i++) {
+            var p = i / 100.0; // 0 ... 1
+            var q = 1 - p; // 1 ... 0
+            micro.rX = q * (q * px0 + p * px1) + p * (q * px1 + p * px2);
+            micro.rY = q * (q * py0 + p * py1) + p * (q * py1 + p * py2);
+            micro.rZ = q * (q * pz0 + p * pz1) + p * (q * pz1 + p * pz2);
             updateState();
             sleep(2000 / speed);
         }
