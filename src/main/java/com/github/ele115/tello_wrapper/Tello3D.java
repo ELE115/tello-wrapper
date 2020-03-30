@@ -85,7 +85,7 @@ public class Tello3D extends Application {
 
     private final static double SCALE_FACTOR = 1.9; // pixels / cm
     private final static double SHIFT = 170; // position of drone w.r.t. room center
-    private final static double COLLIDE_BOX = 26; // length and width of a drone
+    private final static double COLLIDE_BOX = 25; // length and width of a drone
     private Group universe, uobstacles;
 
     private class Drone {
@@ -189,16 +189,39 @@ public class Tello3D extends Application {
             this.micro = micro;
         }
 
+        private boolean checkRotated(IObstacle o, double d0x, double d0y) {
+            var d1x = d0x;
+            var d1y = Math.cos(Math.toRadians(micro.roll)) * d0y;
+            var d1z = Math.sin(Math.toRadians(micro.roll)) * d0y;
+
+            var d2x = Math.cos(Math.toRadians(micro.pitch)) * d1x - Math.sin(Math.toRadians(micro.pitch)) * d1z;
+            var d2y = d1y;
+            var d2z = Math.sin(Math.toRadians(micro.pitch)) * d1x + Math.cos(Math.toRadians(micro.pitch)) * d1z;
+
+            var d3x = Math.cos(Math.toRadians(micro.rAngle)) * d2x - Math.sin(Math.toRadians(micro.rAngle)) * d2y;
+            var d3y = Math.sin(Math.toRadians(micro.rAngle)) * d2x + Math.cos(Math.toRadians(micro.rAngle)) * d2y;
+            var d3z = d2z;
+
+            return o.check(micro.rX + d3x, micro.rY + d3y, micro.rZ + d3z);
+        }
+
         public boolean check() {
             if (micro == null)
                 return false;
 
+            var dx = COLLIDE_BOX / 2;
+            var dy = COLLIDE_BOX / 2 * 0.6;
+
             var flag = false;
             for (var obj : obstacles) {
-                if (obj.check(micro.rX - COLLIDE_BOX / 2, micro.rY - COLLIDE_BOX / 2, micro.rZ)
-                        || obj.check(micro.rX - COLLIDE_BOX / 2, micro.rY + COLLIDE_BOX / 2, micro.rZ)
-                        || obj.check(micro.rX + COLLIDE_BOX / 2, micro.rY - COLLIDE_BOX / 2, micro.rZ)
-                        || obj.check(micro.rX + COLLIDE_BOX / 2, micro.rY + COLLIDE_BOX / 2, micro.rZ)) {
+                if (checkRotated(obj, dx, dy)
+                        || checkRotated(obj, dy, dx)
+                        || checkRotated(obj, dx, -dy)
+                        || checkRotated(obj, dy, -dx)
+                        || checkRotated(obj, -dx, dy)
+                        || checkRotated(obj, -dy, dx)
+                        || checkRotated(obj, -dx, -dy)
+                        || checkRotated(obj, -dy, -dx)) {
                     System.err.println("Your drone hits " + obj);
                     flag = true;
                 }
