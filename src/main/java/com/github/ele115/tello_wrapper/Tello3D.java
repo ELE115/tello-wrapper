@@ -79,7 +79,8 @@ public class Tello3D extends Application {
     }
 
     private final static double SCALE_FACTOR = 1.9; // pixels / cm
-    private final static double SHIFT = 170;
+    private final static double SHIFT = 170; // position of drone w.r.t. room center
+    private final static double COLLIDE_BOX = 26; // length and width of a drone
     private Group universe, uobstacles;
 
     private class Drone {
@@ -180,7 +181,10 @@ public class Tello3D extends Application {
                 return;
 
             for (var obj : obstacles) {
-                if (obj.check(micro.rX, micro.rY, micro.rZ))
+                if (obj.check(micro.rX - COLLIDE_BOX / 2, micro.rY - COLLIDE_BOX / 2, micro.rZ)
+                        || obj.check(micro.rX - COLLIDE_BOX / 2, micro.rY + COLLIDE_BOX / 2, micro.rZ)
+                        || obj.check(micro.rX + COLLIDE_BOX / 2, micro.rY - COLLIDE_BOX / 2, micro.rZ)
+                        || obj.check(micro.rX + COLLIDE_BOX / 2, micro.rY + COLLIDE_BOX / 2, micro.rZ))
                     System.err.println("Your drone hits " + obj);
             }
         }
