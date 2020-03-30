@@ -281,8 +281,8 @@ class TelloSimulator implements ITelloDrone {
         if (micro.rZ == 0)
             throw new RuntimeException("Not taken off yet");
         for (var i = 0; i < 100; i++) {
-            micro.rX += (Math.sin(Math.toRadians(micro.rAngle)) * x + Math.cos(Math.toRadians(micro.rAngle)) * y) / 100;
-            micro.rY += (-Math.cos(Math.toRadians(micro.rAngle)) * x + Math.sin(Math.toRadians(micro.rAngle)) * y) / 100;
+            micro.rX += (-Math.sin(Math.toRadians(micro.rAngle)) * y + Math.cos(Math.toRadians(micro.rAngle)) * x) / 100;
+            micro.rY += (Math.cos(Math.toRadians(micro.rAngle)) * y + Math.sin(Math.toRadians(micro.rAngle)) * x) / 100;
             micro.rZ += z / 100.0;
             updateState();
             sleep(2000 / speed);
@@ -294,8 +294,8 @@ class TelloSimulator implements ITelloDrone {
         if (micro.rZ == 0)
             throw new RuntimeException("Not taken off yet");
         for (var i = 0; i < 100; i++) {
-            micro.rX += (Math.sin(Math.toRadians(micro.rAngle)) * x2 + Math.cos(Math.toRadians(micro.rAngle)) * y2) / 100;
-            micro.rY += (-Math.cos(Math.toRadians(micro.rAngle)) * x2 + Math.sin(Math.toRadians(micro.rAngle)) * y2) / 100;
+            micro.rX += (-Math.sin(Math.toRadians(micro.rAngle)) * y2 + Math.cos(Math.toRadians(micro.rAngle)) * x2) / 100;
+            micro.rY += (Math.cos(Math.toRadians(micro.rAngle)) * y2 + Math.sin(Math.toRadians(micro.rAngle)) * x2) / 100;
             micro.rZ += z2 / 100.0;
             updateState();
             sleep(2000 / speed);
