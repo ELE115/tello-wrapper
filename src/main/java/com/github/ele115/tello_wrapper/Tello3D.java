@@ -197,9 +197,9 @@ public class Tello3D extends Application {
         uobstacles.getTransforms().add(new Translate(-SHIFT, 0, 0));
         universe.getChildren().add(uobstacles);
         addObstacle(new ObstacleWall(-0.1, 0, SHIFT, Color.DARKGRAY)); // Floor
-        addObstacle(new ObstacleWall(340, 5, SHIFT, Color.LIGHTBLUE)); // Front
+        addObstacle(new ObstacleWall(340, 5, SHIFT, Color.LIGHTGREEN)); // Front
 //        addObstacle(new ObstacleWall(-340, 4, SHIFT, Color.RED)); // Back
-        addObstacle(new ObstacleWall(-340, 2, SHIFT, Color.PINK)); // Left
+        addObstacle(new ObstacleWall(-340, 2, SHIFT, Color.LIGHTBLUE)); // Left
 
         // The main window
         var mainCamera = new PerspectiveCamera();

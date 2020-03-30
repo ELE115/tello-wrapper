@@ -22,8 +22,9 @@ enum BorderValue {
 }
 
 public class Main {
-    private static double droneX = 75;
-    private static double droneY = -200;
+    private static double droneX = 0;
+    private static double droneY = -400;
+    private static int droneZ = 100;
 
     public static void main(String[] args) {
         Tello.setWindowSize(960, 720);
@@ -31,9 +32,9 @@ public class Main {
 //        Tello.getSimulator().addObstacle(new ObstacleCylinder(0, 150, Color.ORANGE));
 //        Tello.getSimulator().addObstacle(new ObstacleBox(0, 0, 30, Color.LIGHTBLUE));
 //        Tello.getSimulator().addObstacle(new ObstacleBall(0, 30, 0, Color.RED));
-        Tello.getSimulator().addObstacle(new ObstacleGate(15, 0, 20, 20, Color.RED));
-        Tello.getSimulator().addObstacle(new ObstacleGate(100, 400, 0, 0, Color.GREEN));
-        Tello.getSimulator().addObstacle(new ObstacleGate(0, 800, 0, 40, Color.RED));
+        Tello.getSimulator().addObstacle(new ObstacleGate(0, 0, 50, 20, Color.RED));
+//        Tello.getSimulator().addObstacle(new ObstacleGate(100, 400, 0, 0, Color.GREEN));
+//        Tello.getSimulator().addObstacle(new ObstacleGate(0, 800, 0, 40, Color.RED));
         var d1 = Tello.Connect("simulator", droneX, droneY, 90);
 //        var d2 = Tello.Connect("simulator", 0, 0, 90);
         d1.addVideoListener(new VideoWindow());
@@ -43,6 +44,7 @@ public class Main {
         d1.setStreaming(true);
 //        d2.setStreaming(true);
         d1.takeoff();
+        d1.up(droneZ);
 //        d2.takeoff();
         interactiveControl(d1, frameGrabber);
 
@@ -141,6 +143,10 @@ public class Main {
                     break;
             }
         }
+    }
+
+    public static void printDroneLocation() {
+        System.out.println("Drone X: " + droneX + " Drone Y: " + droneY);
     }
 
 

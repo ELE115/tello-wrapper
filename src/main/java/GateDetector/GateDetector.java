@@ -9,12 +9,12 @@ public class GateDetector {
     private int[][] gateEdges;
     private int frameWidth;
     private int frameHeight;
-    private static int CHANNEL_THRES = 200;
+    private static int CHANNEL_THRES = 160;
     private int leftEdge;
     private int rightEdge;
     private int upperEdge;
     private int bottomEdge;
-    private double alignmentError = 0.1;
+    private double alignmentError = 0.05;
 
 
     public GateDetector() {
