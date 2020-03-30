@@ -20,6 +20,7 @@ public class Main {
 
         Tello.setWindowSize(960, 720);
         Tello.getSimulator().addObstacle(new ObstacleGate(60, 250, 50, 20, Color.RED));
+        Tello.getSimulator().setNoisy(true);
         var d1 = Tello.Connect("simulator", droneX, droneY, 90);
         d1.addVideoListener(new VideoWindow());
         FrameGrabber frameGrabber = new FrameGrabber(1);

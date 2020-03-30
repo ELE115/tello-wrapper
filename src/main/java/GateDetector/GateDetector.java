@@ -36,7 +36,7 @@ public class GateDetector {
         for (int i = 0; i < frameWidth; i++) {
             for (int j = 0; j < frameHeight; j++) {
                 c = new Color(frame.getRGB(i, j));
-                val = c.getRed() > channelThres ? 1 : 0;
+                val = c.getRed() > channelThres && c.getGreen() < 255 - channelThres && c.getBlue() < 255 - channelThres ? 1 : 0;
                 frameFiltered[j][i] = val;
             }
         }
