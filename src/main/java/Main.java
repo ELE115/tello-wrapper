@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 
 public class Main {
     public static void main(String[] args) {
+
         if (args.length != 3) {
             System.err.println("Requires three arguments: x y z");
             System.exit(1);
@@ -22,8 +23,10 @@ public class Main {
         // Add a gate to the scene.
         Tello.getSimulator().addObstacle(new ObstacleGate(60, 250, 50, 20, Color.RED));
 
-        // Tweak some settings of the simulator
-        Tello.getSimulator().setNoisy(true);
+        // Uncomment the following line to make the camera more "realistic"
+        // Tello.getSimulator().setNoisy(true);
+
+        // Hang the program upon drone collision
         Tello.getSimulator().setOnCollision("hang"); // "hang" or "exit" or "nothing"
 
         // Uncomment the following lines if you don't have a good video card
