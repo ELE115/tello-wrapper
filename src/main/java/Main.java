@@ -24,7 +24,7 @@ public class Main {
         int droneZ = Integer.parseInt(args[2]);
 
         Tello.setWindowSize(960, 720);
-        Tello.getSimulator().addObstacle(new ObstacleGate(60, 0, 50, 20, Color.RED));
+        Tello.getSimulator().addObstacle(new ObstacleGate(60, 250, 50, 20, Color.RED));
         var d1 = Tello.Connect("simulator", droneX, droneY, 90);
         d1.addVideoListener(new VideoWindow());
         FrameGrabber frameGrabber = new FrameGrabber(1);
@@ -35,7 +35,7 @@ public class Main {
 
         // Fly through a gate
         alignGateAndFrameCenters(d1, frameGrabber);
-        d1.forward(-droneY+100);
+        d1.forward(-droneY+400);
 
         d1.land();
     }

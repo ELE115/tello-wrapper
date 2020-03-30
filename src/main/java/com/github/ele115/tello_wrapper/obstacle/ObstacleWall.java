@@ -16,9 +16,9 @@ public class ObstacleWall extends Obstacle {
         switch (dir) {
             case 0: // z < v
             case 1: // z > v
-                ((Box) o).setWidth(1500);
+                ((Box) o).setWidth(680);
                 ((Box) o).setHeight(0.1);
-                ((Box) o).setDepth(660);
+                ((Box) o).setDepth(680);
                 o.getTransforms().add(new Translate(shift, -v, 0));
                 ((PhongMaterial) o.getMaterial()).setDiffuseMap(new Image("/htree.png"));
                 break;

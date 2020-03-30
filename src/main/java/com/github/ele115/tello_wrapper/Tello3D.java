@@ -198,7 +198,7 @@ public class Tello3D extends Application {
         universe.getChildren().add(uobstacles);
         addObstacle(new ObstacleWall(-0.1, 0, SHIFT, Color.DARKGRAY)); // Floor
         addObstacle(new ObstacleWall(340, 5, SHIFT, Color.LIGHTGREEN)); // Front
-//        addObstacle(new ObstacleWall(-340, 4, SHIFT, Color.RED)); // Back
+        addObstacle(new ObstacleWall(-340, 4, SHIFT, Color.PINK)); // Back
         addObstacle(new ObstacleWall(-340, 2, SHIFT, Color.LIGHTBLUE)); // Left
 
         // The main window
