@@ -1,5 +1,3 @@
-package GateDetector;
-
 public class SlidingAverage {
     private int size;
     private int[] wnd;
