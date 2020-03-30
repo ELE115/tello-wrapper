@@ -194,7 +194,7 @@ public class Tello3D extends Application {
                 for (var i = 0; i < snapshot.getWidth(); i++)
                     for (var j = 0; j < snapshot.getHeight(); j++) {
                         var rgb = snapshot.getRGB(i, j);
-                        if (rnd.nextDouble() > 0.3)
+                        if (rnd.nextDouble() > 0.1)
                             continue;
                         rgb = rnd.nextInt();
                         snapshot.setRGB(i, j, rgb);
