@@ -34,6 +34,7 @@ public class Tello3D extends Application {
     private static int defaultWidth = 960, defaultHeight = 720;
     private boolean delayUpdate = false;
     private boolean noisy = false;
+    private String onCollision = null;
     private final List<Drone> drones = new ArrayList<>();
     private final List<IObstacle> obstacles = new ArrayList<>();
     private double mousePosX, mousePosY;
@@ -66,6 +67,10 @@ public class Tello3D extends Application {
 
     public void setNoisy(boolean v) {
         noisy = v;
+    }
+
+    public void setOnCollision(String v) {
+        onCollision = v;
     }
 
     void addSimulator(TelloSimulator sim) {
@@ -161,8 +166,16 @@ public class Tello3D extends Application {
                 updateDrone(s);
                 for (var obj : obstacles)
                     obj.clear();
+                var flag = false;
                 for (var d : drones)
-                    d.check();
+                    flag |= d.check();
+                if (flag) {
+                    if ("hang".equals(onCollision)) {
+                        sim.hang();
+                    } else if ("exit".equals(onCollision)) {
+                        System.exit(23);
+                    }
+                }
             }));
         }
 
@@ -176,17 +189,21 @@ public class Tello3D extends Application {
             this.micro = micro;
         }
 
-        public void check() {
+        public boolean check() {
             if (micro == null)
-                return;
+                return false;
 
+            var flag = false;
             for (var obj : obstacles) {
                 if (obj.check(micro.rX - COLLIDE_BOX / 2, micro.rY - COLLIDE_BOX / 2, micro.rZ)
                         || obj.check(micro.rX - COLLIDE_BOX / 2, micro.rY + COLLIDE_BOX / 2, micro.rZ)
                         || obj.check(micro.rX + COLLIDE_BOX / 2, micro.rY - COLLIDE_BOX / 2, micro.rZ)
-                        || obj.check(micro.rX + COLLIDE_BOX / 2, micro.rY + COLLIDE_BOX / 2, micro.rZ))
+                        || obj.check(micro.rX + COLLIDE_BOX / 2, micro.rY + COLLIDE_BOX / 2, micro.rZ)) {
                     System.err.println("Your drone hits " + obj);
+                    flag = true;
+                }
             }
+            return flag;
         }
 
         private Random rnd = new Random();

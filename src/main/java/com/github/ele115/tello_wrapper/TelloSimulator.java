@@ -27,10 +27,16 @@ class TelloSimulator implements ITelloDrone {
     private boolean streaming;
     private TelloMicroState micro;
     private int speed;
+    private boolean isHanged = false;
 
     private final boolean traceable;
 
     protected void updateState() {
+        if (isHanged) {
+            while (true)
+                sleep(Long.MAX_VALUE);
+        }
+
         var temp = fetchTemperature();
         var tof = fetchTOFDistance();
         var height = fetchHeight();
@@ -89,6 +95,10 @@ class TelloSimulator implements ITelloDrone {
             }
         }
         updateState();
+    }
+
+    void hang() {
+        isHanged = true;
     }
 
     @Override

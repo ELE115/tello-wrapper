@@ -21,7 +21,10 @@ public class Main {
 
         // Add a gate to the scene.
         Tello.getSimulator().addObstacle(new ObstacleGate(60, 250, 50, 20, Color.RED));
+
+        // Tweak some settings of the simulator
         Tello.getSimulator().setNoisy(true);
+        Tello.getSimulator().setOnCollision("hang"); // "hang" or "exit" or "nothing"
 
         // Uncomment the following lines if you don't have a good video card
         // Tello.getSimulator().setSnapshotInt(300);
