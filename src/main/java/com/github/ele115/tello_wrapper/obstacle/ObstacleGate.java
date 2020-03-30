@@ -27,7 +27,6 @@ public class ObstacleGate implements IObstacle {
         this.angle = angle;
         this.g = new Group();
         this.m = new PhongMaterial();
-//        this.m.setDiffuseMap(new Image("/brick.jpg"));
         this.m.setDiffuseColor(color);
         this.m.setSpecularColor(Color.DARKRED);
 
