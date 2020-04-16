@@ -15,6 +15,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.Cylinder;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
@@ -23,6 +25,7 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Tello3D extends Application {
@@ -84,11 +87,19 @@ public class Tello3D extends Application {
         this.snapshotInt = i;
     }
 
+    public void showLabel(boolean v) {
+        showLabel = true;
+        for (var d : drones)
+            d.showLabel(v);
+    }
+
     private final static double SCALE_FACTOR = 1.9; // pixels / cm
     private final static double SHIFT = 170; // position of drone w.r.t. room center
     private final static double COLLIDE_BOX = 25; // length and width of a drone
     private final static double COLLIDE_HEIGHT = 10; // height of a drone
     private Group universe, uobstacles;
+    private static AtomicInteger did = new AtomicInteger();
+    private boolean showLabel = false;
 
     private class Drone implements IObstacle {
         private TelloSimulator sim;
@@ -98,6 +109,7 @@ public class Tello3D extends Application {
         private Rotate droneZRotate;
         private SnapshotParameters dronePars;
         private TelloMicroState micro;
+        private Text droneText;
 
         public Drone(TelloSimulator sim) {
             var drone = new Group();
@@ -151,6 +163,13 @@ public class Tello3D extends Application {
                 dronePars.setViewport(new Rectangle2D(0, 0, droneWidth, droneHeight));
                 dronePars.setDepthBuffer(true);
             }
+            droneText = new Text("" + did.getAndIncrement());
+            droneText.setFont(Font.font(100));
+            droneText.setFill(Color.GOLD);
+            droneText.setCache(true);
+            droneText.setVisible(showLabel);
+            droneText.setTranslateX(-30);
+            drone.getChildren().add(droneText);
             droneXRotate = new Rotate(0, Rotate.X_AXIS);
             droneYRotate = new Rotate(0, Rotate.Y_AXIS);
             droneZRotate = new Rotate(0, Rotate.Z_AXIS);
@@ -288,6 +307,10 @@ public class Tello3D extends Application {
         @Override
         public String toString() {
             return "another drone";
+        }
+
+        public void showLabel(boolean v) {
+            droneText.setVisible(v);
         }
     }
 
